@@ -1,2 +1,2 @@
-# yami-org.yamikaze.mock
-a org.yamikaze.mock util in Spring context and dependency on junit4
+# spring-integrate-mock
+a mock util in Spring context and dependency on junit4
