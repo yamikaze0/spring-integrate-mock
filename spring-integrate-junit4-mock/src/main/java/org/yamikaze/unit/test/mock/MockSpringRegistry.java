@@ -94,31 +94,7 @@ public class MockSpringRegistry implements BeanDefinitionRegistryPostProcessor {
     }
 
     private void removeBeanDefinition(BeanDefinitionRegistry registry) {
-        if (!GlobalConfig.getRemoveDisconf()) {
-            return;
-        }
-
-        String[] beanDefinitionNames = registry.getBeanDefinitionNames();
-        for (String beanName : beanDefinitionNames) {
-            BeanDefinition beanDefinition = registry.getBeanDefinition(beanName);
-            String beanClassName = beanDefinition.getBeanClassName();
-            if (Objects.equals(beanClassName, "com.hipac.disconf.client.DisconfMgrBean")
-                    || Objects.equals(beanClassName, "com.hipac.disconf.client.DisconfMgrBeanSecond")) {
-                LOGGER.info("remove disconf bean {}, class = {}", beanName, beanClassName);
-                registry.removeBeanDefinition(beanName);
-                continue;
-            }
-
-            if (beanClassName == null) {
-                continue;
-            }
-
-            if ((beanClassName.contains("DisconfMgrBean")
-                    || beanClassName.contains("DisconfMgrBeanSecond"))) {
-                LOGGER.info("remove disconf bean {}, class = {}", beanName, beanClassName);
-                registry.removeBeanDefinition(beanName);
-            }
-        }
+        
 
     }
 
