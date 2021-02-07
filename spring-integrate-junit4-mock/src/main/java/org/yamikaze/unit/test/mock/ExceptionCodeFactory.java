@@ -51,7 +51,7 @@ public class ExceptionCodeFactory {
     }
 
     public static void registerByJson(String json) {
-        JSONObject object = null;
+        JSONObject object;
         try {
             object = JSONObject.parseObject(json);
         } catch (Exception e) {

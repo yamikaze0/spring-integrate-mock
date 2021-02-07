@@ -21,7 +21,7 @@ public class InvokeTree {
 
     private InvokeEntry root;
     
-    private long start;
+    private final long start;
 
     InvokeTree() {
         this.start = System.currentTimeMillis();
@@ -124,14 +124,14 @@ public class InvokeTree {
 
         private boolean closed;
         
-        private long start;
+        private final long start;
 
         private boolean occurredException;
 
         /**
          * Current Node message.
          */
-        private String message;
+        private final String message;
 
         InvokeEntry(String message) {
             this.message = message;
@@ -288,9 +288,9 @@ public class InvokeTree {
             }
 
 
-            for (int i = 0; i < subInvokeEntries.size(); i++) {
+            for (InvokeEntry subInvokeEntry : subInvokeEntries) {
                 String nextPrefix = generatePrefix(prefix, hasNextBrother());
-                subInvokeEntries.get(i).dump(nextPrefix, sb);
+                subInvokeEntry.dump(nextPrefix, sb);
             }
         }
 

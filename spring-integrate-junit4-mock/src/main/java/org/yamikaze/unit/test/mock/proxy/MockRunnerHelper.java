@@ -1,8 +1,6 @@
 package org.yamikaze.unit.test.mock.proxy;
 
 import org.yamikaze.unit.test.mock.annotation.MockEnhance;
-import org.yamikaze.unit.test.mock.annotation.MockFinal;
-import org.yamikaze.unit.test.mock.annotation.MockStatic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,18 +14,8 @@ import java.util.stream.Collectors;
  */
 public class MockRunnerHelper {
 
-    public static List<Class> extraEnhanceClasses(MockStatic ms, MockFinal mf, MockEnhance me) {
-        List<Class> enhanceClasses = new ArrayList<>(16);
-
-        if (ms != null && ms.value().length > 0) {
-            addAll(enhanceClasses, ms.value());
-        }
-
-
-        if (mf != null && mf.value().length > 0) {
-            addAll(enhanceClasses, mf.value());
-        }
-
+    public static List<Class<?>> extraEnhanceClasses(MockEnhance me) {
+        List<Class<?>> enhanceClasses = new ArrayList<>(16);
 
         if (me != null && me.value().length > 0) {
             addAll(enhanceClasses, me.value());
@@ -39,7 +27,7 @@ public class MockRunnerHelper {
     /**
      * cs:off
      */
-    private static void addAll(List<Class> classes, Class[] ca) {
+    private static void addAll(List<Class<?>> classes, Class<?>[] ca) {
         classes.addAll(Arrays.asList(ca));
     }
 }

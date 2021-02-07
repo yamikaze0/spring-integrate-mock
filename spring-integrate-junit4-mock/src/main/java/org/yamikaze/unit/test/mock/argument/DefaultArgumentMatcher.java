@@ -76,7 +76,7 @@ public class DefaultArgumentMatcher implements ArgumentMatcher {
             for (int i = 0; i < primitiveArray.length; i++) {
                 primitiveArray[i] = Array.get(varArgArray, i);
             }
-            return Arrays.asList((Object[]) primitiveArray);
+            return Arrays.asList(primitiveArray);
         } else {
             return Collections.singletonList(varArgArray);
         }

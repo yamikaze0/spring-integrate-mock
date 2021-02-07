@@ -1,4 +1,4 @@
-package org.yamikaze.unit.test;
+package org.yamikaze.unit.test.junit.parameterized;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.io.IOException;
  * @version 1.0.0
  * @date 2020-08-17 14:41
  */
-public final class IOUtils {
+final class IOUtils {
 
     public static void close(Closeable closeable) {
         try {

@@ -28,9 +28,6 @@ public class GlobalConfig {
      * 异步加载bean开关
      */
     private static boolean ASYNC_INIT_SWITCH = true;
-
-    private static boolean REMOVE_DISCONF = false;
-
     /**
      * 异步加载的bean配置
      */
@@ -75,14 +72,6 @@ public class GlobalConfig {
 
     public static void setUseAgentProxy(boolean useAgentProxy) {
         GlobalConfig.useAgentProxy = useAgentProxy;
-    }
-
-    public static boolean getRemoveDisconf() {
-        return REMOVE_DISCONF;
-    }
-
-    public static void setRemoveDisconf(boolean removeDisconf) {
-        REMOVE_DISCONF = removeDisconf;
     }
 
     public static boolean getEnableRealInvokeLog() {
@@ -169,7 +158,7 @@ public class GlobalConfig {
         mockClassPattern.remove(APACHE_DUBBO_SERVICE_BEAN);
     }
 
-    public static void addMockClass(Class clz) {
+    public static void addMockClass(Class<?> clz) {
         if (clz == null) {
             throw new IllegalArgumentException("mock class must not be null!");
         }
@@ -178,7 +167,7 @@ public class GlobalConfig {
         mockClassPattern.add(clz.getName());
     }
 
-    public static void addMustJdkMock(Class clz) {
+    public static void addMustJdkMock(Class<?> clz) {
         if (clz == null) {
             throw new IllegalArgumentException("mock class must not be null!");
         }
@@ -193,7 +182,7 @@ public class GlobalConfig {
         mustJdkMockClassPattern.add(clz.getName());
     }
 
-    public static void removeMustJdkMock(Class clz) {
+    public static void removeMustJdkMock(Class<?> clz) {
         if (clz == null) {
             throw new IllegalArgumentException("mock class must not be null!");
         }
@@ -202,7 +191,7 @@ public class GlobalConfig {
         mustJdkMockClassPattern.remove(clz.getName());
     }
 
-    public static void removeMockClass(Class clz) {
+    public static void removeMockClass(Class<?> clz) {
         if (clz == null) {
             throw new IllegalArgumentException("mock class must not be null!");
         }

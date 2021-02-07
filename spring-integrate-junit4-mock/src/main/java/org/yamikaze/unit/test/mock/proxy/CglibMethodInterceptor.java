@@ -2,13 +2,13 @@ package org.yamikaze.unit.test.mock.proxy;
 
 import org.yamikaze.unit.test.mock.RecordBehavior;
 import org.yamikaze.unit.test.mock.RecordBehaviorList;
-import org.yamikaze.unit.test.mock.YamiMock;
 import org.yamikaze.unit.test.mock.answer.Answer;
-import org.yamikaze.unit.test.mock.argument.DefaultArgumentMatcher;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
+
+import static org.yamikaze.unit.test.mock.proxy.JdkInvocationHandler.recordAndAnswer;
 
 /**
  * @author qinluo
@@ -36,19 +36,6 @@ public class CglibMethodInterceptor implements MethodInterceptor {
         recordBehavior.setClz(o.getClass().getSuperclass());
 
         //binding argument matcher..
-        int index = 0;
-        if (args != null && args.length > 0) {
-            for (Object arg : args) {
-                recordBehavior.addArgumentMatcher(new DefaultArgumentMatcher(arg, method, index++));
-            }
-        }
-
-        if (YamiMock.getDoNothingAnswer() != null) {
-            recordBehavior.addAnswer(YamiMock.getDoNothingAnswer());
-            YamiMock.clear();
-        }
-
-
-        return answer.answer(invocation);
+        return recordAndAnswer(method, args, invocation, answer, recordBehavior);
     }
 }

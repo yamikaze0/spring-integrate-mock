@@ -18,11 +18,11 @@ public final class ConverterFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConverterFactory.class);
 
-    private static final Set<Class> BASE_TYPES = new HashSet<>();
-    private static final Map<Class, ParamConverter> CONVERTERS = new ConcurrentHashMap<>(32);
+    private static final Set<Class<?>> BASE_TYPES = new HashSet<>();
+    private static final Map<Class<?>, ParamConverter> CONVERTERS = new ConcurrentHashMap<>(32);
 
 
-    public static ParamConverter getConverter(Class clazz) {
+    public static ParamConverter getConverter(Class<?> clazz) {
         if (BASE_TYPES.contains(clazz)) {
             return CONVERTERS.get(clazz);
         }

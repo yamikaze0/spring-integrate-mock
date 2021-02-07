@@ -14,6 +14,6 @@ public class TimeoutExceptionHandler implements DegradeExceptionHandler {
 
     @Override
     public void handler(Exception e) {
-        LOGGER.error("degrade timeoutException error, e = {}", e);
+        LOGGER.error("degrade timeoutException error", e);
     }
 }

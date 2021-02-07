@@ -18,7 +18,7 @@ public class ArgumentFactoryProxy implements ArgumentFactory {
         ArgumentFactory adaptiveArgumentFactory = null;
         
         List<ArgumentFactory> extensions = ExtensionFactory.getExtensions(ArgumentFactory.class);
-        if (extensions != null && !extensions.isEmpty()) {
+        if (!extensions.isEmpty()) {
             adaptiveArgumentFactory = findAdaptiveAndHighPriorityFactory(fileLocation, extensions);
         }
 

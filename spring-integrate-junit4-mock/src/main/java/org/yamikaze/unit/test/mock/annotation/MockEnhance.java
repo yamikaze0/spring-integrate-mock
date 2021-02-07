@@ -20,5 +20,5 @@ public @interface MockEnhance {
      * 需要mock的class array
      * @return class array
      */
-    Class[] value();
+    Class<?>[] value();
 }

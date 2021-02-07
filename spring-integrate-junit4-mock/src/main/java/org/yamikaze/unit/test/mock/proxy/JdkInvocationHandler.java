@@ -35,6 +35,10 @@ public class JdkInvocationHandler implements InvocationHandler {
         recordBehavior.setMethod(method);
 
         //binding argument matcher
+        return recordAndAnswer(method, args, invocation, answer, recordBehavior);
+    }
+
+    public static Object recordAndAnswer(Method method, Object[] args, InvocationMethod invocation, Answer answer, RecordBehavior recordBehavior) {
         int index = 0;
         if (args != null && args.length > 0) {
             for (Object arg : args) {

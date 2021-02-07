@@ -17,11 +17,11 @@ import java.util.List;
  */
 public class UnAccessedAnswerEventListener implements EventListener {
 
-    private static List<UnAccessedAnswerProcessor> unAccessedAnswerProcessors = new ArrayList<>(8);
+    private static final List<UnAccessedAnswerProcessor> UN_ACCESSED_ANSWER_PROCESSORS = new ArrayList<>(8);
 
     static {
         List<UnAccessedAnswerProcessor> processors = ExtensionFactory.getExtensions(UnAccessedAnswerProcessor.class);
-        unAccessedAnswerProcessors.addAll(processors);
+        UN_ACCESSED_ANSWER_PROCESSORS.addAll(processors);
     }
 
     @Override
@@ -49,14 +49,14 @@ public class UnAccessedAnswerEventListener implements EventListener {
     }
 
     private void unAccessedAnswerProcess(List<Answer> unAccessedAnswer) {
-        List<UnAccessedAnswerProcessor> uaaps = unAccessedAnswerProcessors;
+        List<UnAccessedAnswerProcessor> uaaps = UN_ACCESSED_ANSWER_PROCESSORS;
         for (UnAccessedAnswerProcessor unAccessedAnswerProcessor : uaaps) {
             unAccessedAnswerProcessor.processUnAccessedAnswer(unAccessedAnswer);
         }
     }
 
     public static void addUnAccessedAnswerProcessor(UnAccessedAnswerProcessor unAccessedAnswerProcessor) {
-        unAccessedAnswerProcessors.remove(unAccessedAnswerProcessor);
-        unAccessedAnswerProcessors.add(unAccessedAnswerProcessor);
+        UN_ACCESSED_ANSWER_PROCESSORS.remove(unAccessedAnswerProcessor);
+        UN_ACCESSED_ANSWER_PROCESSORS.add(unAccessedAnswerProcessor);
     }
 }

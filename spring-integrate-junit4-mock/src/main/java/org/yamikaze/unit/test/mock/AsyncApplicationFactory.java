@@ -76,7 +76,7 @@ public class AsyncApplicationFactory extends DefaultListableBeanFactory {
                 EXECUTOR.shutdownNow();
             }
         } catch (Exception e) {
-            LOGGER.error("stop async executor error, e = {}", e);
+            LOGGER.error("stop async executor error", e);
         }
         super.destroySingletons();
     }

@@ -3,7 +3,7 @@ package org.yamikaze.unit.test.junit;
 import org.yamikaze.unit.test.junit.parameterized.Arguments;
 import org.yamikaze.unit.test.junit.parameterized.Param;
 import org.yamikaze.unit.test.junit.parameterized.ParamParser;
-import org.yamikaze.unit.test.junit.parameterized.ParameterContext;
+import org.yamikaze.unit.test.junit.parameterized.ParameterDescriptor;
 import org.yamikaze.unit.test.junit.parameterized.converter.Converter;
 import org.yamikaze.unit.test.junit.parameterized.converter.ConverterFactory;
 import org.yamikaze.unit.test.junit.parameterized.converter.ParamConverter;
@@ -32,7 +32,7 @@ public class DefaultParamParser implements ParamParser {
     }
 
     @Override
-    public Object[] parse(Arguments arguments, String method, ParameterContext ... contexts) throws Throwable {
+    public Object[] parse(Arguments arguments, String method, ParameterDescriptor... contexts) {
         if (contexts == null || contexts.length == 0) {
             LOGGER.warn("params contexts is empty. return new Object[0];");
             return new Object[0];
@@ -51,7 +51,7 @@ public class DefaultParamParser implements ParamParser {
         // maybe contexts length is less than params size.
         for (; index < contexts.length && index < params.size(); index++) {
 
-            ParameterContext context = contexts[index];
+            ParameterDescriptor context = contexts[index];
             ParamConverter converter = getParamConverter(context);
             if (converter == null) {
                 String msg = "can't find a converter for param at index " + index
@@ -76,8 +76,8 @@ public class DefaultParamParser implements ParamParser {
         return actualArgs;
     }
 
-    private ParamConverter getParamConverter(ParameterContext context) {
-        Class converterClazz = getConverterClz(context);
+    private ParamConverter getParamConverter(ParameterDescriptor context) {
+        Class<?> converterClazz = getConverterClz(context);
 
         // If there are no config converter, use parameter's type as converter
         if (converterClazz == null) {
@@ -87,7 +87,7 @@ public class DefaultParamParser implements ParamParser {
         return ConverterFactory.getConverter(converterClazz);
     }
 
-    private Class getConverterClz(ParameterContext context) {
+    private Class<?> getConverterClz(ParameterDescriptor context) {
         Annotation[] parameterAnnotations = context.getParameterAnnotations();
         for (Annotation annotation : parameterAnnotations) {
             if (annotation.annotationType() == Converter.class) {

@@ -7,6 +7,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.ManagedList;
@@ -31,22 +32,18 @@ public class MockSpringRegistry implements BeanDefinitionRegistryPostProcessor {
 
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
-    private AtomicLong sequence;
-
-    private List<String> ignoreBean = new ArrayList<>(16);
+    /**
+     * Internal sequence for generated bean name.
+     */
+    private final AtomicLong sequence = new AtomicLong(new Random().nextInt(100000));;
 
     /**
-     * Some bean must registered to parent context.
+     * Ignored Auto-proxying bean names.
      */
-    private static volatile boolean registered = false;
-
-    public MockSpringRegistry() {
-        this.sequence = new AtomicLong(new Random().nextInt(100000));
-    }
+    private List<String> ignoreBeans = new ArrayList<>(16);
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        removeBeanDefinition(registry);
 
         String[] beanDefinitionNames = registry.getBeanDefinitionNames();
 
@@ -93,40 +90,11 @@ public class MockSpringRegistry implements BeanDefinitionRegistryPostProcessor {
         }
     }
 
-    private void removeBeanDefinition(BeanDefinitionRegistry registry) {
-        if (!GlobalConfig.getRemoveDisconf()) {
-            return;
-        }
-
-        String[] beanDefinitionNames = registry.getBeanDefinitionNames();
-        for (String beanName : beanDefinitionNames) {
-            BeanDefinition beanDefinition = registry.getBeanDefinition(beanName);
-            String beanClassName = beanDefinition.getBeanClassName();
-            if (Objects.equals(beanClassName, "com.hipac.disconf.client.DisconfMgrBean")
-                    || Objects.equals(beanClassName, "com.hipac.disconf.client.DisconfMgrBeanSecond")) {
-                LOGGER.info("remove disconf bean {}, class = {}", beanName, beanClassName);
-                registry.removeBeanDefinition(beanName);
-                continue;
-            }
-
-            if (beanClassName == null) {
-                continue;
-            }
-
-            if ((beanClassName.contains("DisconfMgrBean")
-                    || beanClassName.contains("DisconfMgrBeanSecond"))) {
-                LOGGER.info("remove disconf bean {}, class = {}", beanName, beanClassName);
-                registry.removeBeanDefinition(beanName);
-            }
-        }
-
-    }
-
     private void extractBeanNameByBeanNamePattern(BeanDefinitionRegistry registry, String[] beanDefinitionNames, List<String> mockBeanNames, List<String> mockInterfaceBeanNames) {
         for(String beanName : beanDefinitionNames) {
             BeanDefinition beanDefinition = registry.getBeanDefinition(beanName);
             String beanClassName = beanDefinition.getBeanClassName();
-            if (match(ignoreBean, beanClassName)) {
+            if (match(ignoreBeans, beanClassName)) {
                 mockInterfaceBeanNames.remove(beanName);
                 mockBeanNames.remove(beanName);
                 continue;
@@ -214,14 +182,13 @@ public class MockSpringRegistry implements BeanDefinitionRegistryPostProcessor {
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-
+        // resolve recycle reference
+        if (beanFactory instanceof AbstractAutowireCapableBeanFactory) {
+            ((AbstractAutowireCapableBeanFactory) beanFactory).setAllowRawInjectionDespiteWrapping(true);
+        }
     }
 
-    public List<String> getIgnoreBean() {
-        return ignoreBean;
-    }
-
-    public void setIgnoreBean(List<String> ignoreBean) {
-        this.ignoreBean = ignoreBean;
+    public void setIgnoreBeans(List<String> ignoreBeans) {
+        this.ignoreBeans = ignoreBeans;
     }
 }

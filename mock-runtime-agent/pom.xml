@@ -64,8 +64,8 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Premain-Class>org.yamikaze.org.yamikaze.mock.agent.AgentEntrance</Premain-Class>
-                            <Agent-Class>org.yamikaze.org.yamikaze.mock.agent.AgentEntrance</Agent-Class>
+                            <Premain-Class>org.yamikaze.mock.agent.AgentEntrance</Premain-Class>
+                            <Agent-Class>org.yamikaze.mock.agent.AgentEntrance</Agent-Class>
                             <Can-Retransform-Classes>true</Can-Retransform-Classes>
                             <Can-Redefine-Classes>true</Can-Redefine-Classes>
                         </manifestEntries>

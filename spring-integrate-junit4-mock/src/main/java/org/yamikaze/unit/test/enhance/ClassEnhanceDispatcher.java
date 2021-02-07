@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
 
 /**
  * @author qinluo
@@ -19,7 +18,7 @@ public class ClassEnhanceDispatcher {
 
     public static final byte[] ENHANCE_ERR = new byte[0];
 
-    public byte[] enhance(Class clz, ModifyConfig config) {
+    public byte[] enhance(Class<?> clz, ModifyConfig config) {
         ClassEnhancer classEnhancer;
 
         String resourceName = clz.getName().replace(".", "/") + ".class";
@@ -48,7 +47,7 @@ public class ClassEnhanceDispatcher {
         try {
             return classEnhancer.enhanceClass();
         } catch (Exception e) {
-            LOGGER.error("enhance class {} error, e = {}", resource, e);
+            LOGGER.error("enhance class {} error, e = {}", resourceName, e);
         }
 
         return ENHANCE_ERR;

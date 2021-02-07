@@ -11,7 +11,7 @@ public class InvocationMethod {
 
     private Method method;
 
-    private Class declaringClass;
+    private Class<?> declaringClass;
 
     private Object proxy;
 
@@ -19,7 +19,7 @@ public class InvocationMethod {
 
     private Object[] args;
 
-    private Class targetClass;
+    private Class<?> targetClass;
 
     /**
      * extends field
@@ -52,15 +52,15 @@ public class InvocationMethod {
         this.method = method;
     }
 
-    public void setDeclaringClass(Class declaringClass) {
+    public void setDeclaringClass(Class<?> declaringClass) {
         this.declaringClass = declaringClass;
     }
 
-    public Class getTargetClass() {
+    public Class<?> getTargetClass() {
         return targetClass;
     }
 
-    public void setTargetClass(Class targetClass) {
+    public void setTargetClass(Class<?> targetClass) {
         this.targetClass = targetClass;
     }
 
@@ -80,7 +80,7 @@ public class InvocationMethod {
         return method;
     }
 
-    public Class getDeclaringClass() {
+    public Class<?> getDeclaringClass() {
         return declaringClass;
     }
 

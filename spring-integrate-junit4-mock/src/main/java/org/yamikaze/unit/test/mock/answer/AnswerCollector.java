@@ -10,7 +10,7 @@ import org.yamikaze.unit.test.mock.RecordBehaviorList;
  */
 public class AnswerCollector<T> {
 
-    private RecordBehavior behavior;
+    private final RecordBehavior behavior;
 
     public AnswerCollector() {
         this.behavior = RecordBehaviorList.INSTANCE.getCurrentRecordBehavior();

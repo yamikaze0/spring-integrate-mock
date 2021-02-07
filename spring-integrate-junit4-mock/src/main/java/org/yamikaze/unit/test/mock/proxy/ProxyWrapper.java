@@ -7,20 +7,20 @@ package org.yamikaze.unit.test.mock.proxy;
  */
 public class ProxyWrapper {
 
-    private Class mockType;
+    private Class<?> mockType;
 
     private Object mockObject;
 
-    public ProxyWrapper(Class mockType, Object mockObject) {
+    public ProxyWrapper(Class<?> mockType, Object mockObject) {
         this.mockType = mockType;
         this.mockObject = mockObject;
     }
 
-    public Class getMockType() {
+    public Class<?> getMockType() {
         return mockType;
     }
 
-    public void setMockType(Class mockType) {
+    public void setMockType(Class<?> mockType) {
         this.mockType = mockType;
     }
 

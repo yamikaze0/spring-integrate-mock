@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class DefaultValueAnswer extends AbstractAnswer {
 
-    private static final Map<Class, Object> DEFAULT_VALUE = new HashMap<>();
+    private static final Map<Class<?>, Object> DEFAULT_VALUE = new HashMap<>();
 
 
     static {
