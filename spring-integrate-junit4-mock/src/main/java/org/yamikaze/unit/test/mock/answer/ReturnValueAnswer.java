@@ -9,7 +9,7 @@ import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
  */
 public class ReturnValueAnswer extends AbstractAnswer {
 
-    private Object value;
+    private final Object value;
 
     public ReturnValueAnswer(Object value) {
         this.value = value;

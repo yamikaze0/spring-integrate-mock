@@ -11,9 +11,15 @@ import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
  */
 public class CodeAnswer extends AbstractAnswer {
 
-    private boolean exception;
+    /**
+     * Answer result is exception.
+     */
+    private final boolean exception;
 
-    private String code;
+    /**
+     * Answer code.
+     */
+    private final String code;
 
     public CodeAnswer(boolean exception, String code) {
         this.exception = exception;

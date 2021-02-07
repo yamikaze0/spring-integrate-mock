@@ -7,5 +7,20 @@ package org.yamikaze.unit.test.enhance;
  */
 public interface ClassEnhancer {
 
+    /**
+     * Object classname.
+     */
+    String JAVA_LANG_OBJECT = Object.class.getName();
+
+    /**
+     * The Array descriptor character in jvm.
+     */
+    String ARRAY_DIMENSION_CHAR = "[";
+
+    /**
+     * Enhance class and return class bytes.
+     *
+     * @return class bytes.
+     */
     byte[] enhanceClass();
 }

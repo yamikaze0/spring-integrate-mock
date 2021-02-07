@@ -1,14 +1,5 @@
 package org.yamikaze.unit.test.mock;
 
-import org.yamikaze.unit.test.ExtensionRule;
-import org.yamikaze.unit.test.enhance.ClassEnhanceDispatcher;
-import org.yamikaze.unit.test.enhance.MockClassEnhancer;
-import org.yamikaze.unit.test.enhance.ModifyConfig;
-import org.yamikaze.unit.test.junit.JunitParameterizedRunner;
-import org.yamikaze.unit.test.mock.annotation.MockEnhance;
-import org.yamikaze.unit.test.mock.annotation.MockFinal;
-import org.yamikaze.unit.test.mock.annotation.MockStatic;
-import org.yamikaze.unit.test.mock.proxy.MockRunnerHelper;
 import org.junit.rules.TestRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
@@ -16,9 +7,14 @@ import org.junit.runners.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.yamikaze.unit.test.ExtensionRule;
+import org.yamikaze.unit.test.enhance.ClassEnhanceDispatcher;
+import org.yamikaze.unit.test.enhance.MockClassEnhancer;
+import org.yamikaze.unit.test.enhance.ModifyConfig;
+import org.yamikaze.unit.test.junit.JunitParameterizedRunner;
+import org.yamikaze.unit.test.mock.annotation.MockEnhance;
+import org.yamikaze.unit.test.mock.proxy.MockRunnerHelper;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -109,21 +105,11 @@ public class SpringJunitMockRunner extends SpringJUnit4ClassRunner {
 
     static class MockClassLoader extends ClassLoader  {
 
-        private static Set<String> modifyClasses = new HashSet<>(16);
+        private static final Set<String> MODIFIED_CLASSES = new HashSet<>(16);
 
-        private static Map<String, ModifyConfig> configMap = new HashMap<>(16);
+        private static Map<String, ModifyConfig> MODIFIED_MAP = new HashMap<>(16);
 
-        static {
-            modifyClasses.add("org.junit.Assert");
-            configMap.put("org.junit.Assert", new ModifyConfig("org.junit.Assert", true));
-
-            modifyClasses.add("org.springframework.util.Assert");
-            configMap.put("org.springframework.util.Assert", new ModifyConfig("org.springframework.util.Assert", true));
-        }
-
-        private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
-        private boolean first = true;
+        private final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         public MockClassLoader(ClassLoader parent) {
             super(parent);
@@ -131,26 +117,22 @@ public class SpringJunitMockRunner extends SpringJUnit4ClassRunner {
 
 
 
-        Class replaceClass(Class clz) {
-            MockStatic mockStatic = (MockStatic)clz.getDeclaredAnnotation(MockStatic.class);
-            MockFinal mockFinal = (MockFinal)clz.getAnnotation(MockFinal.class);
-            MockEnhance mockEnhance = (MockEnhance)clz.getAnnotation(MockEnhance.class);
+        Class<?> replaceClass(Class<?> clz) {
+            MockEnhance mockEnhance = clz.getAnnotation(MockEnhance.class);
 
-            List<Class> allSuperClass = ClassUtils.getAllSuperClass(clz);
-            List<Class> enhanceClasses = MockRunnerHelper.extraEnhanceClasses(mockStatic, mockFinal, mockEnhance);
+            List<Class<?>> allSuperClass = ClassUtils.getAllSuperClass(clz);
+            List<Class<?>> enhanceClasses = MockRunnerHelper.extraEnhanceClasses(mockEnhance);
 
             try {
                 enhanceClasses(enhanceClasses);
 
-                if (allSuperClass != null) {
-                    for (Class superClz : allSuperClass) {
-                        modifyClasses.add(superClz.getName());
-                        configMap.put(superClz.getName(), new ModifyConfig(superClz.getName(), false));
-                    }
+                for (Class<?> superClz : allSuperClass) {
+                    MODIFIED_CLASSES.add(superClz.getName());
+                    MODIFIED_MAP.put(superClz.getName(), new ModifyConfig(superClz.getName(), false));
                 }
 
-                modifyClasses.add(clz.getName());
-                configMap.put(clz.getName(), new ModifyConfig(clz.getName(), false));
+                MODIFIED_CLASSES.add(clz.getName());
+                MODIFIED_MAP.put(clz.getName(), new ModifyConfig(clz.getName(), false));
 
             } catch (Exception e) {
                 // ignore
@@ -162,7 +144,7 @@ public class SpringJunitMockRunner extends SpringJUnit4ClassRunner {
             try {
                 Thread.currentThread().setContextClassLoader(LOADER);
                 String internalName = clz.getName().replace(".", "/");
-                Class modifiedClass = MODIFIED_CLASSES.get(internalName);
+                Class<?> modifiedClass = SpringJunitMockRunner.MODIFIED_CLASSES.get(internalName);
                 if (modifiedClass != null) {
                     return modifiedClass;
                 }
@@ -175,20 +157,20 @@ public class SpringJunitMockRunner extends SpringJUnit4ClassRunner {
 
         }
 
-        private void enhanceClasses(List<Class> enhanceClasses) throws UnmodifiableClassException {
+        private void enhanceClasses(List<Class<?>> enhanceClasses) throws UnmodifiableClassException {
             if (enhanceClasses == null || enhanceClasses.isEmpty()) {
                 return;
             }
 
             if (inst == null || !GlobalConfig.getUseAgentProxy()) {
-                addAll(modifyClasses, enhanceClasses);
+                addAll(MODIFIED_CLASSES, enhanceClasses);
             } else {
                 ClassFileTransformer transformer = new ClassFileTransformer() {
-                    private List<String> ec = enhanceClasses.stream().map(Class::getName).collect(Collectors.toList());
+                    private final List<String> ec = enhanceClasses.stream().map(Class::getName).collect(Collectors.toList());
 
                     @Override
                     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-                        if (className == null || MODIFIED_CLASSES.containsKey(className)) {
+                        if (className == null || SpringJunitMockRunner.MODIFIED_CLASSES.containsKey(className)) {
                             return null;
                         }
 
@@ -202,7 +184,7 @@ public class SpringJunitMockRunner extends SpringJUnit4ClassRunner {
                             LOGGER.info("enhance class {}", classBeingRedefined.getName());
                             byte[] newClassFileBuffer = new MockClassEnhancer(classfileBuffer).enhanceClass();
                             if (newClassFileBuffer != null) {
-                                MODIFIED_CLASSES.put(className, classBeingRedefined);
+                                SpringJunitMockRunner.MODIFIED_CLASSES.put(className, classBeingRedefined);
                             }
 
                             return newClassFileBuffer;
@@ -214,7 +196,7 @@ public class SpringJunitMockRunner extends SpringJUnit4ClassRunner {
 
                 try {
                     inst.addTransformer(transformer, true);
-                    Class[] classes = enhanceClasses.toArray(new Class[0]);
+                    Class<?>[] classes = enhanceClasses.toArray(new Class[0]);
                     inst.retransformClasses(classes);
 
 
@@ -225,11 +207,11 @@ public class SpringJunitMockRunner extends SpringJUnit4ClassRunner {
             }
         }
 
-        private void addAll(Set<String> modifyClasses, List<Class> values) {
-            for (Class clz : values) {
+        private void addAll(Set<String> modifyClasses, List<Class<?>> values) {
+            for (Class<?> clz : values) {
                 if (clz != null) {
                     modifyClasses.add(clz.getName());
-                    configMap.put(clz.getName(), new ModifyConfig(clz.getName(), true));
+                    MODIFIED_MAP.put(clz.getName(), new ModifyConfig(clz.getName(), true));
                 }
             }
         }
@@ -247,7 +229,7 @@ public class SpringJunitMockRunner extends SpringJUnit4ClassRunner {
         @Override
         protected Class<?> findClass(String name) throws ClassNotFoundException {
             String internalName = name.replace(".", "/");
-            Class modifiedClass = MODIFIED_CLASSES.get(internalName);
+            Class modifiedClass = SpringJunitMockRunner.MODIFIED_CLASSES.get(internalName);
             if (modifiedClass != null) {
                 return modifiedClass;
             }
@@ -264,12 +246,12 @@ public class SpringJunitMockRunner extends SpringJUnit4ClassRunner {
         private boolean shouldModify(String name) {
             //非匿名内部类
             if (!name.contains("$")) {
-                return modifyClasses.contains(name);
+                return MODIFIED_CLASSES.contains(name);
             }
 
             //如果是匿名内部类，那么对于外部的类，如果使用了Cl1加载，那么也必须使用Cl1来加载匿名内部类，否则就会无法访问
             String parentClassName = name.substring(0, name.indexOf("$"));
-            return modifyClasses.contains(parentClassName);
+            return MODIFIED_CLASSES.contains(parentClassName);
         }
 
         private boolean isSystemClass(String name) {
@@ -294,7 +276,7 @@ public class SpringJunitMockRunner extends SpringJUnit4ClassRunner {
                 className = name.substring(0, name.indexOf("$"));
             }
 
-            byte[] enhancedBytes = DISPATCHER.enhance(targetClass, configMap.get(className));
+            byte[] enhancedBytes = DISPATCHER.enhance(targetClass, MODIFIED_MAP.get(className));
             if (enhancedBytes == ClassEnhanceDispatcher.ENHANCE_ERR) {
                 return targetClass;
             }
@@ -302,7 +284,7 @@ public class SpringJunitMockRunner extends SpringJUnit4ClassRunner {
             try {
 
                 Class clz = defineClass(name, enhancedBytes, 0, enhancedBytes.length);
-                MODIFIED_CLASSES.put(name.replace(".", "/"), clz);
+                SpringJunitMockRunner.MODIFIED_CLASSES.put(name.replace(".", "/"), clz);
                 LOGGER.info("replace class {}", name);
                 return clz;
             } catch (ClassFormatError e) {
@@ -311,18 +293,5 @@ public class SpringJunitMockRunner extends SpringJUnit4ClassRunner {
 
             return targetClass;
         }
-    }
-
-    public static String getPwd() throws Exception {
-        Process pwd = Runtime.getRuntime().exec("pwd");
-        InputStream outputStream = pwd.getInputStream();
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        int i;
-        byte[] buffer = new byte[1024];
-        while ((i = outputStream.read(buffer, 0 , 1024)) > 0) {
-            bos.write(buffer, 0 , i);
-        }
-
-        return bos.toString();
     }
 }

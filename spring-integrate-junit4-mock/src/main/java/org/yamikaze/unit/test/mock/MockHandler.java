@@ -1,16 +1,15 @@
 package org.yamikaze.unit.test.mock;
 
-import org.yamikaze.unit.test.handler.Handler;
-import org.yamikaze.unit.test.mock.annotation.Mock;
-import org.yamikaze.unit.test.mock.annotation.MockCollection;
-import org.yamikaze.unit.test.mock.annotation.Mocks;
-import org.yamikaze.unit.test.mock.answer.CodeAnswer;
-import org.yamikaze.unit.test.mock.config.MockConfig;
-import org.yamikaze.unit.test.tree.Profilers;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamikaze.unit.test.handler.Handler;
+import org.yamikaze.unit.test.mock.annotation.Mock;
+import org.yamikaze.unit.test.mock.annotation.Mocks;
+import org.yamikaze.unit.test.mock.answer.CodeAnswer;
+import org.yamikaze.unit.test.mock.config.MockConfig;
+import org.yamikaze.unit.test.tree.Profilers;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -34,9 +33,8 @@ public class MockHandler implements Handler {
         Profilers.startInvoke(message);
 
         Mock mock = description.getAnnotation(Mock.class);
-        MockCollection mockCollection = description.getAnnotation(MockCollection.class);
         Mocks mocks = description.getAnnotation(Mocks.class);
-        if (mock == null && mockCollection == null && mocks == null) {
+        if (mock == null && mocks == null) {
             return;
         }
 
@@ -46,7 +44,6 @@ public class MockHandler implements Handler {
             mockConfigs.add(parseConfig(mock));
         }
 
-        mockConfigs.addAll(parseMockCollection(mockCollection));
         mockConfigs.addAll(parseMocks(mocks));
 
         /*
@@ -134,18 +131,6 @@ public class MockHandler implements Handler {
         config.setMockMethodPattern(mock.method());
         config.setMockExceptionCode(mock.exceptionCode());
         return config;
-    }
-
-    private List<MockConfig> parseMockCollection(MockCollection mockCollection) {
-        List<MockConfig> mockConfigs = new ArrayList<>(16);
-        if (mockCollection != null) {
-            Mock[] mocks = mockCollection.mocks();
-            for (Mock m : mocks) {
-                mockConfigs.add(parseConfig(m));
-            }
-        }
-
-        return mockConfigs;
     }
 
     private List<MockConfig> parseMocks(Mocks mocks) {

@@ -63,7 +63,7 @@ public class InvokeParamMethod extends InvokeMethod {
         Class<?>[] parameterTypes = testMethod.getMethod().getParameterTypes();
         Annotation[][] parameterAnnotations = testMethod.getMethod().getParameterAnnotations();
 
-        ParameterContext[] parameterContexts = assemblyParamContext(parameterTypes, parameterAnnotations);
+        ParameterDescriptor[] parameterContexts = assemblyParamContext(parameterTypes, parameterAnnotations);
 
         for (Arguments argument : arguments) {
             LOGGER.info("start execute testcase {}", testcaseIndex);
@@ -100,12 +100,12 @@ public class InvokeParamMethod extends InvokeMethod {
         }
     }
 
-    private ParameterContext[] assemblyParamContext(Class<?>[] parameterTypes, Annotation[][] parameterAnnotations) {
-        ParameterContext[] contexts = new ParameterContext[parameterTypes.length];
+    private ParameterDescriptor[] assemblyParamContext(Class<?>[] parameterTypes, Annotation[][] parameterAnnotations) {
+        ParameterDescriptor[] contexts = new ParameterDescriptor[parameterTypes.length];
 
         int index = 0;
-        for (Class type : parameterTypes) {
-            contexts[index] = new ParameterContext(type, parameterAnnotations[index]);
+        for (Class<?> type : parameterTypes) {
+            contexts[index] = new ParameterDescriptor(type, parameterAnnotations[index]);
             index++;
         }
 

@@ -2,7 +2,7 @@ package org.yamikaze.unit.test.degrade;
 
 import org.slf4j.event.Level;
 import org.yamikaze.unit.test.degrade.handler.DegradeExceptionHandler;
-import org.yamikaze.unit.test.degrade.handler.IgnoreDegradeExcetionHandler;
+import org.yamikaze.unit.test.degrade.handler.IgnoredExceptionHandler;
 import org.yamikaze.unit.test.degrade.handler.LogDegradeExceptionHandler;
 import org.yamikaze.unit.test.degrade.handler.ThrowLogDegradeExceptionHandler;
 import org.yamikaze.unit.test.degrade.handler.TimeoutExceptionHandler;
@@ -59,11 +59,11 @@ public class DegradeUtils {
     /**
      * 忽略异常，什么都不做
      */
-    public static final DegradeExceptionHandler IGNORE = new IgnoreDegradeExcetionHandler();
+    public static final DegradeExceptionHandler IGNORE = new IgnoredExceptionHandler();
 
-    private static final Map<Class, Object> DEFAULT_VALUE = new HashMap<>();
+    private static final Map<Class<?>, Object> DEFAULT_VALUE = new HashMap<>();
 
-    private static final Map<Class, Class> DEGRADE_EXECUTOR_TYPE = new HashMap<>();
+    private static final Map<Class<?>, Class> DEGRADE_EXECUTOR_TYPE = new HashMap<>();
 
     static {
         DEFAULT_VALUE.put(boolean.class, false);
@@ -156,7 +156,7 @@ public class DegradeUtils {
     }
 
     /**
-     * cs:offor
+     * cs:off
      */
     private static <T> T degrade(ExecutorService executorService, DegradeExecutor<T> degradeExecutor, DegradeExceptionHandler handler, T defaultValue, boolean async, long timeout) {
         checkParams(executorService, (degradeExecutor == null), async, timeout);

@@ -28,6 +28,7 @@ public final class ExtensionFactory {
         return Integer.compare(realOrder1, realOrder2);
     };
 
+    @SuppressWarnings("unchecked")
     public static <T> List<T> getExtensions(Class<T> clz) {
 
         if (clz == null) {

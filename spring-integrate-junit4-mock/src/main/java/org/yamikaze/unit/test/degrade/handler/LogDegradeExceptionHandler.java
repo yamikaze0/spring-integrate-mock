@@ -13,7 +13,7 @@ public class LogDegradeExceptionHandler implements DegradeExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogDegradeExceptionHandler.class);
 
-    private Level level;
+    private final Level level;
 
     public LogDegradeExceptionHandler(Level level) {
         if (level == null) {

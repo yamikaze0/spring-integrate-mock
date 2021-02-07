@@ -3,17 +3,25 @@ package org.yamikaze.unit.test.junit.parameterized;
 import java.lang.annotation.Annotation;
 
 /**
+ * Parameter Descriptor
+ *
  * @author qinluo
  * @version 1.0.0
  * @date 2020-08-14 16:40
  */
-public class ParameterContext {
+public class ParameterDescriptor {
 
+    /**
+     * The parameter type.
+     */
     private Class<?> parameterType;
 
+    /**
+     * The annotations in parameter.
+     */
     private Annotation[] parameterAnnotations;
 
-    public ParameterContext(Class<?> parameterType, Annotation[] parameterAnnotations) {
+    public ParameterDescriptor(Class<?> parameterType, Annotation[] parameterAnnotations) {
         this.parameterType = parameterType;
         this.parameterAnnotations = parameterAnnotations;
     }

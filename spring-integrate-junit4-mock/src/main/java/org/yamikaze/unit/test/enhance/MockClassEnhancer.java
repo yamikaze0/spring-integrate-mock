@@ -22,8 +22,14 @@ import java.util.Map;
  */
 public class MockClassEnhancer implements ClassEnhancer {
 
+    /**
+     * The origin class bytes.
+     */
     private final byte[] classFileByte;
 
+    /**
+     * The class bytes after enhanced.
+     */
     private byte[] enhanceBytes;
 
     public MockClassEnhancer(byte[] classFileByte) {
@@ -100,9 +106,9 @@ public class MockClassEnhancer implements ClassEnhancer {
 
         public ModifyStaticMethodVisitor(int api, MethodVisitor mv, int access, String name, String desc) {
             super(api, mv, access, name, desc);
-            this.isClinitMethod = name.equals("<clinit>");
+            this.isClinitMethod = "<clinit>".equals(name);
             this.methodName = name;
-            this.isConstrcutor = name.equals("<init>");
+            this.isConstrcutor = "<init>".equals(name);
             this.argumentTypes = Type.getArgumentTypes(methodDesc);
 
         }
@@ -188,10 +194,10 @@ public class MockClassEnhancer implements ClassEnhancer {
                 visitVarInsn(Opcodes.ALOAD, slots);
 
                 //非Object返回值需要强转
-                if (!"java.lang.Object".equals(returnType.getClassName()))  {
+                if (!JAVA_LANG_OBJECT.equals(returnType.getClassName()))  {
                     String internalName = returnType.getInternalName();
                     boolean isArray = false;
-                    if (internalName.startsWith("[")) {
+                    if (internalName.startsWith(ARRAY_DIMENSION_CHAR)) {
                         isArray = true;
                     }
 

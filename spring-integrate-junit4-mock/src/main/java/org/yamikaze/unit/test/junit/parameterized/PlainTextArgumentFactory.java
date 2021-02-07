@@ -1,6 +1,5 @@
 package org.yamikaze.unit.test.junit.parameterized;
 
-import org.yamikaze.unit.test.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

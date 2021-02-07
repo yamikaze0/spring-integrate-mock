@@ -7,9 +7,9 @@ package org.yamikaze.unit.test.mock.answer;
  */
 public class MockAnswerCollector {
 
-    private Class mockType;
+    private final Class<?> mockType;
 
-    public MockAnswerCollector(Class mockType) {
+    public MockAnswerCollector(Class<?> mockType) {
         this.mockType = mockType;
     }
 

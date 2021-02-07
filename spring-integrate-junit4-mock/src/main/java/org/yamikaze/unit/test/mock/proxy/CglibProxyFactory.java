@@ -24,7 +24,9 @@ public class CglibProxyFactory implements ProxyFactory {
         String base = prefix + "$$" + source.substring(source.lastIndexOf(46) + 1) + PROXY_IDEN + "$$" + Integer.toHexString(key.hashCode());
         String attempt = base;
 
-        for(int var7 = 2; names.evaluate(attempt); attempt = base + "_" + var7++) {
+        int var7 = 2;
+        while (names.evaluate(attempt)) {
+            attempt = base + "_" + var7++;
         }
 
         return attempt;

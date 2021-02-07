@@ -7,7 +7,7 @@ package org.yamikaze.unit.test.junit.parameterized.converter;
  */
 public class IntegerParamConverter implements ParamConverter {
 
-    private boolean isPrimitive;
+    private final boolean isPrimitive;
 
     public IntegerParamConverter(boolean isPrimitive) {
         this.isPrimitive = isPrimitive;

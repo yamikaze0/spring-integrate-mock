@@ -116,7 +116,7 @@ public class AgentProxy {
         }
 
         try {
-            Class hc = Class.forName(AGENT_HOLDER);
+            Class<?> hc = Class.forName(AGENT_HOLDER);
             Method agentMethod = hc.getDeclaredMethod(AGENT_HOLDER_INST);
             Object holder = agentMethod.invoke(null);
 
@@ -134,7 +134,7 @@ public class AgentProxy {
         return inst != null && inst.isRedefineClassesSupported() && inst.isRetransformClassesSupported();
     }
 
-    public static boolean supportRetransformClass(Instrumentation inst, Class clz) {
+    public static boolean supportRetransformClass(Instrumentation inst, Class<?> clz) {
         return supportRetransform(inst) && inst.isModifiableClass(clz);
     }
 

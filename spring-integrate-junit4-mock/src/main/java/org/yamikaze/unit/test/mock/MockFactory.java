@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class MockFactory {
 
-    private static final Map<ProxyWrapper, Class> MOCK_LIST = new HashMap<>(32);
+    private static final Map<ProxyWrapper, Class<?>> MOCK_LIST = new HashMap<>(32);
 
     public static <T> T createMock(Class<T> mockType) {
         if (mockType == null) {
@@ -59,7 +59,7 @@ public class MockFactory {
         return MOCK_LIST.containsKey(wrapper);
     }
 
-    public static Class getMockType(Object obj) {
+    public static Class<?> getMockType(Object obj) {
         if (obj == null) {
             return null;
         }
@@ -76,11 +76,11 @@ public class MockFactory {
 
     }
 
-    private static boolean isCglibProxy(Class proxyClass) {
+    private static boolean isCglibProxy(Class<?> proxyClass) {
         return proxyClass != null && proxyClass.getName().contains(CglibProxyFactory.PROXY_IDEN);
     }
 
-    private static ProxyFactory determineProxyFactory(Class mockType) {
+    private static ProxyFactory determineProxyFactory(Class<?> mockType) {
         boolean useJdkProxy = mockType.isInterface();
         if (useJdkProxy) {
             return JdkProxyFactory.getProxyFactory();

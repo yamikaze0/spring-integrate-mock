@@ -44,7 +44,7 @@ public class EqualsMethodMatcher implements BaseMethodMatcher {
             return false;
         }
 
-        Class[] parameterTypes = method.getParameterTypes();
+        Class<?>[] parameterTypes = method.getParameterTypes();
         return parameterTypes[0] == Object.class;
 
     }

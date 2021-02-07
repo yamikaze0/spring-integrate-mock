@@ -20,18 +20,9 @@ public class VmUtils {
 
         //大于等于1才表示有pid
         if (indexOf >= 1) {
-            return Integer.valueOf(name.substring(0, indexOf));
+            return Integer.parseInt(name.substring(0, indexOf));
         }
 
         return 0;
-    }
-
-    private static int safeParse(String text) {
-
-        try {
-            return Integer.valueOf(text);
-        } catch (NumberFormatException e) {
-            return 0;
-        }
     }
 }

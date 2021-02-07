@@ -18,11 +18,11 @@ import java.util.List;
  */
 public class MethodAnswerCollector {
 
-    private Class mockType;
+    private final Class<?> mockType;
 
-    private String methodName;
+    private final String methodName;
 
-    private List<Class> mockMethodParameterTypes = new ArrayList<>(16);
+    private final List<Class<?>> mockMethodParameterTypes = new ArrayList<>(16);
 
     private Object[] args;
 
@@ -32,7 +32,7 @@ public class MethodAnswerCollector {
 
     private boolean calledTypes;
 
-    public MethodAnswerCollector(Class mockType, String methodName) {
+    public MethodAnswerCollector(Class<?> mockType, String methodName) {
         this.mockType = mockType;
         this.methodName = methodName;
         if (methodName == null || methodName.trim().isEmpty()) {
@@ -49,7 +49,7 @@ public class MethodAnswerCollector {
         return this;
     }
 
-    public MethodAnswerCollector types(Class ...types) {
+    public MethodAnswerCollector types(Class<?> ...types) {
         checkFinished();
         checkTypes(types);
 
@@ -91,7 +91,7 @@ public class MethodAnswerCollector {
         checkFinished();
 
         this.mockFinished = true;
-        Class[] paramTypes = mockMethodParameterTypes.toArray(new Class[0]);
+        Class<?>[] paramTypes = mockMethodParameterTypes.toArray(new Class[0]);
         Method method = ClassUtils.findMethod(mockType, methodName, paramTypes);
         if (method == null) {
             throw new IllegalArgumentException("can't find method " + methodName
@@ -145,12 +145,12 @@ public class MethodAnswerCollector {
         return argumentMatchers;
     }
 
-    private void checkTypes(Class[] types) {
+    private void checkTypes(Class<?>[] types) {
         if (types == null || types.length == 0) {
             return;
         }
 
-        for (Class type : types) {
+        for (Class<?> type : types) {
             if (type == null) {
                 throw new IllegalArgumentException("type must not be null!");
             }
@@ -164,7 +164,7 @@ public class MethodAnswerCollector {
     }
 
 
-    private void checkMethod(String method, Class... paramTypes) {
+    private void checkMethod(String method, Class<?>... paramTypes) {
         Method[] declaredMethods = this.mockType.getDeclaredMethods();
         boolean nonParams = paramTypes == null || paramTypes.length == 0;
         Method matchedMethod = null;

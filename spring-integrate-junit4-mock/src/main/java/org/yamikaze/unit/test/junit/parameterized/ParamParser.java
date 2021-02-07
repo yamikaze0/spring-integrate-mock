@@ -15,6 +15,6 @@ public interface ParamParser {
      * @return           actual params array.
      * @throws Throwable if parse occurred error.
      */
-    Object[] parse(Arguments arguments, String methodName, ParameterContext ...contexts) throws Throwable;
+    Object[] parse(Arguments arguments, String methodName, ParameterDescriptor...contexts) throws Throwable;
 
 }

@@ -24,8 +24,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class AsyncInitBeanPostProcessor implements BeanPostProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncInitBeanPostProcessor.class);
-    private ThreadPoolExecutor executor = ThreadPoolUtils.getFixExecutor(100, 200);
-    private Class referenceClass;
+    private final ThreadPoolExecutor executor = ThreadPoolUtils.getFixExecutor(100, 200);
+    private final Class<?> referenceClass;
 
     public AsyncInitBeanPostProcessor() {
         referenceClass = getReferenceBeanClass();
@@ -66,7 +66,7 @@ public class AsyncInitBeanPostProcessor implements BeanPostProcessor {
         return bean;
     }
 
-    private Class getReferenceBeanClass() {
+    private Class<?> getReferenceBeanClass() {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         Class<?> refClz = null;
         try {

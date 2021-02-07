@@ -5,7 +5,7 @@ package org.yamikaze.unit.test.degrade.handler;
  * @version 1.0.0
  * @since 2019-05-17 17:09
  */
-public class IgnoreDegradeExcetionHandler implements DegradeExceptionHandler {
+public class IgnoredExceptionHandler implements DegradeExceptionHandler {
 
     @Override
     public void handler(Exception e) {

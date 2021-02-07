@@ -10,9 +10,9 @@ import java.lang.reflect.Type;
  */
 public abstract class AbstractAnyArgumentMatcher<T> implements ArgumentMatcher {
 
-    private Class<T> specificClass;
+    private final Class<T> specificClass;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public AbstractAnyArgumentMatcher() {
         ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
         Type type = parameterizedType.getActualTypeArguments()[0];

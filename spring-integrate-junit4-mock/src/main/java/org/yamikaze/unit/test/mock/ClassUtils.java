@@ -9,9 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author qinluo
@@ -20,31 +18,15 @@ import java.util.stream.Collectors;
  */
 public class ClassUtils {
 
-    public static List<Class> getAllInterfaces(Class clz) {
-        Class[] interfaces = clz.getInterfaces();
-        if (interfaces == null || interfaces.length == 0) {
-            return new ArrayList<>(1);
-        }
-
-        List<Class> allInterfaces = new ArrayList<>(interfaces.length);
-        Collections.addAll(allInterfaces, interfaces);
-
-        for (Class parentInterface : interfaces) {
-            allInterfaces.addAll(getAllInterfaces(parentInterface));
-        }
-
-        return allInterfaces.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList());
-    }
-
-    public static List<Class> getAllSuperClass(Class clz) {
+    public static List<Class<?>> getAllSuperClass(Class<?> clz) {
         if (clz == null || clz == Object.class) {
             return new ArrayList<>(0);
         }
 
 
-        List<Class> supers = new ArrayList<>(16);
+        List<Class<?>> supers = new ArrayList<>(16);
 
-        Class internal = clz.getSuperclass();
+        Class<?> internal = clz.getSuperclass();
 
         while (internal != Object.class && internal != null) {
             supers.add(internal);
@@ -79,16 +61,7 @@ public class ClassUtils {
         return candidateMethods;
     }
 
-    /**
-     * 返回(class1, class2)
-     * @param types 类型
-     * @return      返回(class1, class2)
-     */
-    public static String appendClasses(Class[] types) {
-        return appendClasses(types, false);
-    }
-
-    public static String appendClasses(Class[] types, boolean simple) {
+    public static String appendClasses(Class<?>[] types, boolean simple) {
         if (types == null || types.length == 0) {
             return "()";
         }
@@ -96,7 +69,7 @@ public class ClassUtils {
         StringBuilder sb = new StringBuilder(256);
         sb.append("(");
         int index = 0;
-        for (Class type : types) {
+        for (Class<?> type : types) {
             if (simple) {
                 sb.append(type.getSimpleName());
             } else {
@@ -112,7 +85,7 @@ public class ClassUtils {
     }
 
 
-    public static Method findMethod(Class<?> clz, String methodName, Class ...parameterClz) {
+    public static Method findMethod(Class<?> clz, String methodName, Class<?> ...parameterClz) {
         if (clz == null || methodName == null) {
             throw new IllegalArgumentException("parameter [clz] or [methodName] must not be null!");
         }
@@ -128,11 +101,11 @@ public class ClassUtils {
         return declaredMethod;
     }
 
-    public static List<Class> getAllSuperClassesAndInterfaces(Class clz) {
-        Set<Class> allClasses = new HashSet<>(64);
+    public static List<Class<?>> getAllSuperClassesAndInterfaces(Class<?> clz) {
+        Set<Class<?>> allClasses = new HashSet<>(64);
         allClasses.add(clz.getSuperclass());
 
-        Class[] interfaces = clz.getInterfaces();
+        Class<?>[] interfaces = clz.getInterfaces();
         if (interfaces.length == 0) {
             allClasses.remove(Object.class);
             return new ArrayList<>(allClasses);
@@ -142,7 +115,7 @@ public class ClassUtils {
 
         Collections.addAll(allClasses, interfaces);
 
-        for (Class parentInterface : interfaces) {
+        for (Class<?> parentInterface : interfaces) {
             allClasses.add(parentInterface);
             allClasses.addAll(getAllSuperClassesAndInterfaces(parentInterface));
         }
@@ -158,7 +131,7 @@ public class ClassUtils {
             return declaringClass;
         }
 
-        List<Class> allClassList = getAllSuperClassesAndInterfaces(declaringClass);
+        List<Class<?>> allClassList = getAllSuperClassesAndInterfaces(declaringClass);
         if (allClassList.size() == 0) {
             return declaringClass;
         }
@@ -194,19 +167,6 @@ public class ClassUtils {
         return Proxy.isProxyClass(clz) || org.springframework.util.ClassUtils.isCglibProxyClass(clz)
                 || clz.getName().contains("bytecode")
                 || clz.getName().contains("CGLIB");
-    }
-
-    public static Class<?> safeGetClassByClassName(String className) {
-        if (className == null || className.length() <= 0) {
-            return null;
-        }
-
-        try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            //ignore
-        }
-        return null;
     }
 
     public static boolean compareMethod(Method method0, Method method) {
