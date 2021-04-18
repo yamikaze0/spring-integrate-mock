@@ -84,18 +84,15 @@ class ProxyBeanMatcher {
             String beanClassName = beanDefinition.getBeanClassName();
             String factoryClass = beanDefinition.getFactoryBeanName();
 
-            // 没有被匹配
-            if (!matchPattern(proxyBeanNamePatterns, beanName) &&
-                    !matchPattern(proxyClassnamePatterns, beanClassName)) {
-                continue;
-            }
-
-
             // 需要忽略代理的bean
             if (matchPattern(ignoreClassPatterns, beanClassName)
                     || matchPattern(ignoreClassPatterns, factoryClass) ) {
-                proxyBeans.remove(beanName);
-                jdkProxyBeans.remove(beanName);
+                continue;
+            }
+
+            // 没有被匹配
+            if (!matchPattern(proxyBeanNamePatterns, beanName) &&
+                    !matchPattern(proxyClassnamePatterns, beanClassName)) {
                 continue;
             }
 
