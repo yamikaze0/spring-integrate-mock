@@ -16,7 +16,6 @@ import org.springframework.util.AntPathMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -35,7 +34,7 @@ public class MockSpringRegistry implements BeanDefinitionRegistryPostProcessor {
     /**
      * Internal sequence for generated bean name.
      */
-    private final AtomicLong sequence = new AtomicLong(new Random().nextInt(100000));;
+    private final AtomicLong sequence = new AtomicLong(new Random().nextInt(100000));
 
     /**
      * Ignored Auto-proxying bean names.
