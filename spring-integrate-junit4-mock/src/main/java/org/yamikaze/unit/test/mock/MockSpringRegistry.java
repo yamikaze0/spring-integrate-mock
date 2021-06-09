@@ -16,7 +16,6 @@ import org.springframework.util.AntPathMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -35,7 +34,7 @@ public class MockSpringRegistry implements BeanDefinitionRegistryPostProcessor {
     /**
      * Internal sequence for generated bean name.
      */
-    private final AtomicLong sequence = new AtomicLong(new Random().nextInt(100000));;
+    private final AtomicLong sequence = new AtomicLong(new Random().nextInt(100000));
 
     /**
      * Ignored Auto-proxying bean names.
@@ -44,102 +43,113 @@ public class MockSpringRegistry implements BeanDefinitionRegistryPostProcessor {
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-
-        String[] beanDefinitionNames = registry.getBeanDefinitionNames();
-
-        boolean hasMockConfig = (!GlobalConfig.mockClassPattern.isEmpty() || !GlobalConfig.mockBeanNamePattern.isEmpty());
-
-        //没有bean定义 或者 没有mock配置，则不进行mock
-        if (beanDefinitionNames == null || beanDefinitionNames.length == 0 || !hasMockConfig) {
+        ProxyBeanMatcher matcher = new ProxyBeanMatcher(ignoreBeans, registry, GlobalConfig.mockBeanNamePattern,
+                                                        GlobalConfig.mockClassPattern, GlobalConfig.mustJdkMockClassPattern);
+        // 无代理配置或者无bean
+        if (!matcher.hasProxyBeans()) {
             return;
         }
 
-        List<String> mockBeanNames = new ArrayList<>(64);
+        matcher.match();
 
-        //beanName 拦截不为空
-        if (!GlobalConfig.mockBeanNamePattern.isEmpty()) {
-            for(String beanName : beanDefinitionNames) {
-                if (match(GlobalConfig.mockBeanNamePattern, beanName)) {
-                    mockBeanNames.remove(beanName);
-                    mockBeanNames.add(beanName);
-                }
-            }
-        }
+        List<String> proxyBeans = matcher.getProxyBeans();
+        List<String> jdkProxyBeans = matcher.getJdkProxyBeans();
 
-        List<String> mockInterfaceBeanNames = new ArrayList<>(64);
+//        String[] beanDefinitionNames = registry.getBeanDefinitionNames();
+//
+//        boolean hasMockConfig = (!GlobalConfig.mockClassPattern.isEmpty() || !GlobalConfig.mockBeanNamePattern.isEmpty());
+//
+//        //没有bean定义 或者 没有mock配置，则不进行mock
+//        if (beanDefinitionNames == null || beanDefinitionNames.length == 0 || !hasMockConfig) {
+//            return;
+//        }
+//
+//        List<String> proxyBeans = new ArrayList<>(64);
+//
+//        //beanName 拦截不为空
+//        if (!GlobalConfig.mockBeanNamePattern.isEmpty()) {
+//            for(String beanName : beanDefinitionNames) {
+//                if (match(GlobalConfig.mockBeanNamePattern, beanName)) {
+//                    proxyBeans.remove(beanName);
+//                    proxyBeans.add(beanName);
+//                }
+//            }
+//        }
+//
+//        List<String> jdkProxyBeans = new ArrayList<>(64);
+//
+//        //bean class name 拦截不为空
+//        if (!GlobalConfig.mockClassPattern.isEmpty()) {
+//            extractBeanNameByBeanNamePattern(registry, beanDefinitionNames, proxyBeans, jdkProxyBeans);
+//        }
 
-        //bean class name 拦截不为空
-        if (!GlobalConfig.mockClassPattern.isEmpty()) {
-            extractBeanNameByBeanNamePattern(registry, beanDefinitionNames, mockBeanNames, mockInterfaceBeanNames);
-        }
-
-        if (mockBeanNames.isEmpty() && mockInterfaceBeanNames.isEmpty()) {
-            return;
-        }
+//        if (proxyBeans.isEmpty() && jdkProxyBeans.isEmpty()) {
+//            return;
+//        }
 
         RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(MethodMockInterceptor.class);
         registry.registerBeanDefinition("methodMockInterceptor", rootBeanDefinition);
 
-        if (!mockBeanNames.isEmpty()) {
-            registerBeanNameProxy(registry, mockBeanNames, GlobalConfig.isCglibProxy());
+        if (!proxyBeans.isEmpty()) {
+            registerBeanNameProxy(registry, proxyBeans, GlobalConfig.isCglibProxy());
         }
 
-        if (!mockInterfaceBeanNames.isEmpty()) {
+        if (!jdkProxyBeans.isEmpty()) {
             //对于dubbo代理一直使用jdk动态代理
-            registerBeanNameProxy(registry, mockInterfaceBeanNames, false);
+            registerBeanNameProxy(registry, jdkProxyBeans, false);
         }
     }
 
-    private void extractBeanNameByBeanNamePattern(BeanDefinitionRegistry registry, String[] beanDefinitionNames, List<String> mockBeanNames, List<String> mockInterfaceBeanNames) {
-        for(String beanName : beanDefinitionNames) {
-            BeanDefinition beanDefinition = registry.getBeanDefinition(beanName);
-            String beanClassName = beanDefinition.getBeanClassName();
-            if (match(ignoreBeans, beanClassName)) {
-                mockInterfaceBeanNames.remove(beanName);
-                mockBeanNames.remove(beanName);
-                continue;
-            }
-
-            if (!match(GlobalConfig.mockClassPattern, beanDefinition.getBeanClassName())) {
-                continue;
-            }
-
-
-            //针对dubbo需要特别处理
-            if (Objects.equals(beanClassName, GlobalConfig.DUBBO_SERVICE_BEAN)
-                    || Objects.equals(beanClassName, GlobalConfig.APACHE_DUBBO_SERVICE_BEAN)) {
-                //dubbo不能被其他mock
-                mockBeanNames.remove(beanName);
-
-                mockInterfaceBeanNames.remove(beanName);
-                mockInterfaceBeanNames.add(beanName);
-                continue;
-            }
-
-            //对于Mybatis Mapper也这样处理
-            if (Objects.equals(beanClassName, "org.mybatis.spring.mapper.MapperFactoryBean")) {
-                mockInterfaceBeanNames.remove(beanName);
-                mockInterfaceBeanNames.add(beanName);
-
-                //对于Mybatis Mapper不能被其他mock
-                mockBeanNames.remove(beanName);
-                continue;
-            }
-
-            //Must use jdk proxy.
-            if (GlobalConfig.mustJdkMockClassPattern.contains(beanClassName)) {
-                mockInterfaceBeanNames.remove(beanName);
-                mockInterfaceBeanNames.add(beanName);
-
-                mockBeanNames.remove(beanName);
-                continue;
-            }
-
-            mockBeanNames.remove(beanName);
-            mockBeanNames.add(beanName);
-
-        }
-    }
+//    private void extractBeanNameByBeanNamePattern(BeanDefinitionRegistry registry, String[] beanDefinitionNames, List<String> mockBeanNames, List<String> mockInterfaceBeanNames) {
+//        for(String beanName : beanDefinitionNames) {
+//            BeanDefinition beanDefinition = registry.getBeanDefinition(beanName);
+//            String beanClassName = beanDefinition.getBeanClassName();
+//            if (match(ignoreBeans, beanClassName)) {
+//                mockInterfaceBeanNames.remove(beanName);
+//                mockBeanNames.remove(beanName);
+//                continue;
+//            }
+//
+//            if (!match(GlobalConfig.mockClassPattern, beanDefinition.getBeanClassName())) {
+//                continue;
+//            }
+//
+//
+//            //针对dubbo需要特别处理
+//            if (Objects.equals(beanClassName, GlobalConfig.DUBBO_SERVICE_BEAN)
+//                    || Objects.equals(beanClassName, GlobalConfig.APACHE_DUBBO_SERVICE_BEAN)) {
+//                //dubbo不能被其他mock
+//                mockBeanNames.remove(beanName);
+//
+//                mockInterfaceBeanNames.remove(beanName);
+//                mockInterfaceBeanNames.add(beanName);
+//                continue;
+//            }
+//
+//            //对于Mybatis Mapper也这样处理
+//            if (Objects.equals(beanClassName, "org.mybatis.spring.mapper.MapperFactoryBean")) {
+//                mockInterfaceBeanNames.remove(beanName);
+//                mockInterfaceBeanNames.add(beanName);
+//
+//                //对于Mybatis Mapper不能被其他mock
+//                mockBeanNames.remove(beanName);
+//                continue;
+//            }
+//
+//            //Must use jdk proxy.
+//            if (GlobalConfig.mustJdkMockClassPattern.contains(beanClassName)) {
+//                mockInterfaceBeanNames.remove(beanName);
+//                mockInterfaceBeanNames.add(beanName);
+//
+//                mockBeanNames.remove(beanName);
+//                continue;
+//            }
+//
+//            mockBeanNames.remove(beanName);
+//            mockBeanNames.add(beanName);
+//
+//        }
+//    }
 
     private void registerBeanNameProxy(BeanDefinitionRegistry registry, List<String> mockBeanNames, boolean proxyTargetProxy) {
         //注册aop拦截器的bean定义
@@ -166,19 +176,19 @@ public class MockSpringRegistry implements BeanDefinitionRegistryPostProcessor {
         return sequence.addAndGet(12L);
     }
 
-    private boolean match(List<String> patterns, String checkPattern) {
-        if (checkPattern == null) {
-            return false;
-        }
-
-        for (String pattern : patterns) {
-            if (Objects.equals(pattern, checkPattern) || PATH_MATCHER.match(pattern, checkPattern)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
+//    private boolean match(List<String> patterns, String checkPattern) {
+//        if (checkPattern == null) {
+//            return false;
+//        }
+//
+//        for (String pattern : patterns) {
+//            if (Objects.equals(pattern, checkPattern) || PATH_MATCHER.match(pattern, checkPattern)) {
+//                return true;
+//            }
+//        }
+//
+//        return false;
+//    }
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
