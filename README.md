@@ -175,6 +175,7 @@ public class ParameterizedTest {
 ```
 
 单测用例文件内容(txt)
+```
 姓名  |   值   |  时间
 张三  |  123   | 2020-12-21 12:21:23
 李四  |  124   | 2020-12-21 12:21:23
@@ -182,3 +183,4 @@ public class ParameterizedTest {
 yamikaze | 1 |  2020-12-21 11:22:23
 zhouyu | 2 | 2020-12-21 12:21:33
 wang wu | 3  | 2020-12-21 12:21:32
+```
