@@ -22,8 +22,8 @@ public class AgentProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AgentProxy.class);
 
-    private static final String AGENT_PATH = "mock-runtime-agent-1.0.0.jar";
-    private static final String AGENT_HOLDER = "org.yamikaze.mock.agent.RuntimeAgent";
+    private static final String AGENT_PATH = "common-java-agent-1.0.0.jar";
+    private static final String AGENT_HOLDER = "org.yamikaze.common.agent.RuntimeInstHolder";
     private static final String AGENT_HOLDER_INST = "getInstance";
     private static final String AGENT_METHOD = "getInst";
 
@@ -37,16 +37,13 @@ public class AgentProxy {
     }
 
     private static void registerCleaner() {
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                try {
-                    detach();
-                } catch (Exception e) {
-                    LOGGER.error("clean agent proxy occurred error", e);
-                }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                detach();
+            } catch (Exception e) {
+                LOGGER.error("clean agent proxy occurred error", e);
             }
-        });
+        }));
     }
 
     public static void initAgent() {

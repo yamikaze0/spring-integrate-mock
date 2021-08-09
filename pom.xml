@@ -10,7 +10,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>mock-runtime-agent</module>
         <module>spring-integrate-junit4-mock</module>
     </modules>
 
