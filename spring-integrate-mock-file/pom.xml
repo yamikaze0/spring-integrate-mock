@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>org.yamikaze</groupId>
-            <artifactId>spring-integrate-junit4-mock</artifactId>
+            <artifactId>spring-integrate-mock-core</artifactId>
             <version>1.0.1</version>
         </dependency>
 

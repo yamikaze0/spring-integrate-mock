@@ -2,10 +2,9 @@ package org.yamikaze.unit.test.mock;
 
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamikaze.unit.test.check.MethodDescriptor;
 import org.yamikaze.unit.test.handler.HandlerSupport;
 import org.yamikaze.unit.test.mock.answer.AbstractAnswer;
 import org.yamikaze.unit.test.mock.answer.Answer;
@@ -64,8 +63,8 @@ public class MockRecordHandler extends HandlerSupport {
     }
 
     @Override
-    public void before(Statement statement, Description description) {
-        parseMockScene(description);
+    public void before(MethodDescriptor descriptor) {
+        parseMockScene(descriptor);
         //MethodMockInterceptor.addPostpositionProcessor(new LocalFilePostpositionProcessor());
         //MethodMockInterceptor.addPostpositionProcessor(new MockAssertPostpositionProcessor());
         //UnAccessAnswerProcessorRegister.registerUnAccessedAnswerProcessor(new LocalFileDataUnAccessedAnswerProcessor());
@@ -383,24 +382,19 @@ public class MockRecordHandler extends HandlerSupport {
     }
 
     @Override
-    public void after(Statement statement, Description description) {
+    public void after(MethodDescriptor descriptor) {
         LocalFileDataWriter.getWriter().write();
         LocalFileDataWriter.getWriter().clearTask();
 
         Mockit.clear();
     }
 
-    @Override
-    public void throwEx(Statement statement, Description description, Throwable throwable) throws Throwable {
-        super.throwEx(statement, description, throwable);
-    }
-
-    private void parseMockScene(Description description) {
+    private void parseMockScene(MethodDescriptor descriptor) {
         //pre clear
         Mockit.clear();
 
-        String testClassName = description.getClassName();
-        String testMethodName = description.getMethodName();
+        String testClassName = descriptor.getClassName();
+        String testMethodName = descriptor.getMethodName();
         Mockit contextConfig = Mockit.MOCKIT;
         if (StringUtils.isBlank(contextConfig.getSceneCode())) {
             contextConfig.setSceneCode(testMethodName);

@@ -10,8 +10,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>spring-integrate-junit4-mock</module>
         <module>spring-integrate-mock-file</module>
+        <module>spring-integrate-junit4</module>
+        <module>spring-integrate-junit5</module>
+        <module>spring-integrate-mock-core</module>
     </modules>
 
     <properties>
