@@ -6,7 +6,6 @@ import org.junit.internal.runners.statements.InvokeMethod;
 import org.junit.runners.model.FrameworkMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yamikaze.unittest.junit4.DefaultParamParser;
 
 import java.lang.annotation.Annotation;
 import java.util.List;

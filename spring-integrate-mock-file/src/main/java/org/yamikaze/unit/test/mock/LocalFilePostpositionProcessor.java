@@ -1,20 +1,15 @@
 package org.yamikaze.unit.test.mock;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.AntPathMatcher;
+import org.yamikaze.unit.test.spi.JsonObjectMapperProxy;
 
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-
-import static org.yamikaze.unit.test.mock.MethodMockInterceptor.GSON;
-
 
 /**
  * @author qinluo
@@ -26,8 +21,6 @@ public class LocalFilePostpositionProcessor implements PostpositionProcessor {
     private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalFilePostpositionProcessor.class);
-
-    public static final Gson GSON_PRETTY = new GsonBuilder().setPrettyPrinting().registerTypeAdapter(Date.class, new GsonDateTypeAdapter()).create();
 
     private static final LocalFileDataWriter WRITER = LocalFileDataWriter.getWriter();
 
@@ -90,7 +83,7 @@ public class LocalFilePostpositionProcessor implements PostpositionProcessor {
 
         MockData mockData = new MockData();
         mockData.setParams(generateArgs(args));
-        mockData.setResult(GSON.toJson(result));
+        mockData.setResult(JsonObjectMapperProxy.encode(result));
         WRITER.addTask(dirFile, key, invokeTimes, mockData);
     }
 
@@ -111,7 +104,7 @@ public class LocalFilePostpositionProcessor implements PostpositionProcessor {
 
         List<String> argList = new ArrayList<>(args.length);
         for (Object arg : args) {
-            argList.add(GSON.toJson(arg));
+            argList.add(JsonObjectMapperProxy.encode(arg));
         }
 
         return argList;

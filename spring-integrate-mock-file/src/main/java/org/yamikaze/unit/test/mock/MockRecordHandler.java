@@ -10,6 +10,7 @@ import org.yamikaze.unit.test.mock.answer.AbstractAnswer;
 import org.yamikaze.unit.test.mock.answer.Answer;
 import org.yamikaze.unit.test.mock.argument.ArgumentMatcher;
 import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
+import org.yamikaze.unit.test.spi.JsonObjectMapperProxy;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -26,8 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import static org.yamikaze.unit.test.mock.LocalFilePostpositionProcessor.GSON_PRETTY;
 
 /**
  * @author qinluo
@@ -65,10 +64,6 @@ public class MockRecordHandler extends HandlerSupport {
     @Override
     public void before(MethodDescriptor descriptor) {
         parseMockScene(descriptor);
-        //MethodMockInterceptor.addPostpositionProcessor(new LocalFilePostpositionProcessor());
-        //MethodMockInterceptor.addPostpositionProcessor(new MockAssertPostpositionProcessor());
-        //UnAccessAnswerProcessorRegister.registerUnAccessedAnswerProcessor(new LocalFileDataUnAccessedAnswerProcessor());
-
         Mockit mockit = Mockit.MOCKIT;
         //first use current method, second use global config.
         boolean matchParams = mockit.getMatchParams() == null ?
@@ -207,7 +202,7 @@ public class MockRecordHandler extends HandlerSupport {
                     type = genericParamType;
                 }
 
-                Object paramObject = GSON_PRETTY.fromJson(paramJson, type);
+                Object paramObject = JsonObjectMapperProxy.decode(paramJson, type);
                 argumentMatchers.add(new MockRecordArgumentMatcher(paramObject, method, paramIndex++));
             }
         } catch (Exception e) {
@@ -373,7 +368,7 @@ public class MockRecordHandler extends HandlerSupport {
                 baos.write(cache, 0, i);
             }
 
-            return GSON_PRETTY.fromJson(baos.toString(), new TypeToken<MockData>() {}.getType());
+            return JsonObjectMapperProxy.decode(baos.toString(), new TypeToken<MockData>() {}.getType());
         } catch (IOException e) {
             throw new MockException("load mock file " + file.getAbsolutePath() + " fail.", e);
         } finally {

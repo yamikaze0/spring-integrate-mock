@@ -1,5 +1,8 @@
 package org.yamikaze.unittest.junit4;
 
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 import org.yamikaze.unit.test.check.Checker;
 import org.yamikaze.unit.test.check.MethodDescriptor;
 import org.yamikaze.unit.test.degrade.DegradeUtils;
@@ -7,14 +10,10 @@ import org.yamikaze.unit.test.handler.Handler;
 import org.yamikaze.unit.test.handler.ThrowExceptionHandler;
 import org.yamikaze.unit.test.mock.ClassUtils;
 import org.yamikaze.unit.test.mock.RecordBehaviorList;
-import org.yamikaze.unit.test.mock.TestContext;
 import org.yamikaze.unit.test.mock.event.Event;
 import org.yamikaze.unit.test.mock.event.EventListener;
 import org.yamikaze.unit.test.mock.event.TestFinishedEvent;
 import org.yamikaze.unit.test.spi.ExtensionFactory;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -38,21 +37,6 @@ public class ExtensionRule implements TestRule {
         return new ExtensionStatement(base, description);
     }
 
-    /**
-     * extension with checker and handler
-     */
-    public static void registerHandler(Handler handler) {
-        ExtensionStatement.registerHandler(handler);
-    }
-
-    public static void registerChecker(Checker checker) {
-        ExtensionStatement.registerChecker(checker);
-    }
-
-    public static void registerExceptionHandler(Handler handler) {
-        ExtensionStatement.registerExceptionHandler(handler);
-    }
-
     private static class ExtensionStatement extends Statement {
 
         /**
@@ -66,8 +50,6 @@ public class ExtensionRule implements TestRule {
          * Checker List
          */
         private static final List<Checker> CHECKERS = new ArrayList<>(16);
-
-        private static final List<Handler> EXCEPTION_HANDLER = new ArrayList<>(16);
 
         private static final Handler DEFAULT_EXCEPTION_HANDLER = new ThrowExceptionHandler();
 
@@ -106,8 +88,6 @@ public class ExtensionRule implements TestRule {
             //first checker
             touchChecker(descriptor);
 
-            TestContext.setTestInfo(description.getClassName(), description.getMethodName());
-
             //pre handler
             preHandler(descriptor);
 
@@ -125,7 +105,6 @@ public class ExtensionRule implements TestRule {
                 });
 
                 afterHandler(descriptor);
-                EXCEPTION_HANDLER.clear();
                 RecordBehaviorList.INSTANCE.clear();
             }
 
@@ -158,29 +137,9 @@ public class ExtensionRule implements TestRule {
                 handler.throwEx(descriptor, throwable);
             }
 
-            if (EXCEPTION_HANDLER.isEmpty()) {
+            if (HANDLERS.isEmpty()) {
                 DEFAULT_EXCEPTION_HANDLER.throwEx(descriptor, throwable);
-                return;
             }
-
-            for (Handler handler : EXCEPTION_HANDLER) {
-                handler.throwEx(descriptor, throwable);
-            }
-        }
-
-        public static void registerHandler(Handler handler) {
-            HANDLERS.remove(handler);
-            HANDLERS.add(handler);
-        }
-
-        public static void registerExceptionHandler(Handler handler) {
-            EXCEPTION_HANDLER.remove(handler);
-            EXCEPTION_HANDLER.add(handler);
-        }
-
-        public static void registerChecker(Checker checker) {
-            CHECKERS.remove(checker);
-            CHECKERS.add(checker);
         }
     }
 }

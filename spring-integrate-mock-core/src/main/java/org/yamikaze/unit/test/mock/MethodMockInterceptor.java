@@ -1,23 +1,20 @@
 package org.yamikaze.unit.test.mock;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.yamikaze.unit.test.method.MethodUtils;
 import org.yamikaze.unit.test.mock.answer.Answer;
 import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
 import org.yamikaze.unit.test.spi.ExtensionFactory;
 import org.yamikaze.unit.test.spi.JsonObjectMapperProxy;
 import org.yamikaze.unit.test.tree.Profilers;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.FactoryBean;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +39,6 @@ public class MethodMockInterceptor implements MethodInterceptor {
      */
     private static final Object NO_MOCK = new Object();
 
-    public static final Gson GSON =  new GsonBuilder().registerTypeAdapter(Date.class,new GsonDateTypeAdapter()).create();
-
     /**
      * After real-invoke processors.
      */
@@ -52,15 +47,6 @@ public class MethodMockInterceptor implements MethodInterceptor {
     static {
         List<PostpositionProcessor> processors = ExtensionFactory.getExtensions(PostpositionProcessor.class);
         PROCESSORS.addAll(processors);
-    }
-
-    public static void addPostpositionProcessor(PostpositionProcessor processor) {
-        if (processor == null) {
-            return;
-        }
-
-        PROCESSORS.remove(processor);
-        PROCESSORS.add(processor);
     }
 
     private boolean isProfiler(MethodInvokeTime mit) {
@@ -96,7 +82,7 @@ public class MethodMockInterceptor implements MethodInterceptor {
             if (answerResult instanceof OriginMockHolder) {
                 Method pmethod = methodInvokeTime.getMethod();
                 OriginMockHolder holder = (OriginMockHolder) answerResult;
-                answerResult = GSON.fromJson(holder.getJson(), pmethod.getGenericReturnType());
+                answerResult = JsonObjectMapperProxy.decode(holder.getJson(), pmethod.getGenericReturnType());
             }
 
             if (isProfiler(methodInvokeTime)) {

@@ -83,7 +83,7 @@ public class JsonObjectMapperProxy implements JsonObjectMapper {
         return INSTANCE.serialization(obj);
     }
 
-    public static <T> T decode(String json, Class<T> type) {
+    public static <T> T decode(String json, Type type) {
         return INSTANCE.deserialization(json, type);
     }
 }

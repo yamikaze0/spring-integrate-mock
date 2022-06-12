@@ -3,7 +3,6 @@ package org.yamikaze.unit.test.mock;
 import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
 
 import java.lang.reflect.Method;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,8 +33,6 @@ public class MethodInvokeTime {
     private final AtomicInteger mockTimes = new AtomicInteger(0);
 
     private final List<Integer> invokeSequences = new ArrayList<>(64);
-
-    private static final String lineSeparator = java.security.AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty("line.separator"));
 
     private InvocationMethod currentInvocation;
 
@@ -125,7 +122,7 @@ public class MethodInvokeTime {
         return declaringClass.getName() + "#" +
                 method.getName() + ClassUtils.appendClasses(method.getParameterTypes(), true) +
                 " realInvokeTimes : " + realInvokeTimes.get() + " mockInvokeTimes : " + mockTimes.get() +
-                lineSeparator + " invokeSequences: (1 is realInvoke, 0 is mockInvoke)" + lineSeparator +
+                Constants.LINE_SEPARATOR + " invokeSequences: (1 is realInvoke, 0 is mockInvoke)" + Constants.LINE_SEPARATOR +
                 "\t" + invokeSequences;
     }
 

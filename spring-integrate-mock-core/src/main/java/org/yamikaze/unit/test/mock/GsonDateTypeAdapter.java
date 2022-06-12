@@ -11,7 +11,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 /**
  * @author huqiang
@@ -19,10 +18,7 @@ import java.util.regex.Pattern;
  */
 public class GsonDateTypeAdapter extends TypeAdapter<Date> {
 
-    private final DateFormat enUsFormat = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT,
-            Locale.US);
-
-    private static final Pattern PATTERN = Pattern.compile("\\d+");
+    private final DateFormat enUsFormat = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, Locale.US);
 
     @Override
     public void write(JsonWriter out, Date value) throws IOException {

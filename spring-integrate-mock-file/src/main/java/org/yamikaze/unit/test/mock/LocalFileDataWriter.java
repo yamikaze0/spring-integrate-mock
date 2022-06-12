@@ -2,6 +2,7 @@ package org.yamikaze.unit.test.mock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamikaze.unit.test.spi.JsonObjectMapperProxy;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -76,7 +77,7 @@ public class LocalFileDataWriter {
         public void write() {
             //避免跟之前的文件冲突
             File file = findUnCreated(parentFile, key, invokeTimes);
-            byte[] bytes = LocalFilePostpositionProcessor.GSON_PRETTY.toJson(mockData).getBytes();
+            byte[] bytes = JsonObjectMapperProxy.encode(mockData).getBytes();
             FileOutputStream fileOutputStream = null;
 
             try {

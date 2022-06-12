@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamikaze.unit.test.mock.answer.AbstractAnswer;
 import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
+import org.yamikaze.unit.test.spi.JsonObjectMapperProxy;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -75,7 +76,7 @@ public class LocalFileDataAnswer extends AbstractAnswer {
             while ((i = inputStream.read(cache)) != -1) {
                 sb.append(new String(cache, 0, i));
             }
-            mockData = LocalFilePostpositionProcessor.GSON_PRETTY.fromJson(sb.toString(), new TypeToken<MockData>() {}.getType());
+            mockData = JsonObjectMapperProxy.decode(sb.toString(), new TypeToken<MockData>() {}.getType());
         } catch (IOException e) {
             throw new MockException("load mock file " + file.getAbsolutePath() + " fail.", e);
         } finally {

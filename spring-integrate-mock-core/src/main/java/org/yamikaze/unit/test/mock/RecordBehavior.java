@@ -58,7 +58,7 @@ public class RecordBehavior {
         this.matchBeanName = matchBeanName;
     }
 
-    private List<ArgumentMatcher> argumentMatchers = new ArrayList<>();
+    private final List<ArgumentMatcher> argumentMatchers = new ArrayList<>();
 
     public boolean getMatchParams() {
         return matchParams;

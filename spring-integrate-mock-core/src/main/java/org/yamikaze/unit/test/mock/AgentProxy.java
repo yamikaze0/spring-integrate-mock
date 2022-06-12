@@ -39,7 +39,9 @@ public class AgentProxy {
     private static void registerCleaner() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
-                detach();
+                if (isAttached()) {
+                    detach();
+                }
             } catch (Exception e) {
                 LOGGER.error("clean agent proxy occurred error", e);
             }
@@ -81,8 +83,7 @@ public class AgentProxy {
                 if (attachedVm != null) {
                     attachedVm.detach();
                 }
-            } catch (Exception ee) {
-                // ignore
+            } catch (Exception ignored) {
             }
         }
 
@@ -96,13 +97,13 @@ public class AgentProxy {
         if (attached) {
             try {
                 attachedVm.detach();
-            } catch (Exception e) {
-                //
+            } catch (Exception ignore) {
             }
         }
 
         if (agentFile != null) {
             LOGGER.info("delete agent temp file {}", agentFile.getAbsolutePath());
+            //noinspection ResultOfMethodCallIgnored
             agentFile.delete();
         }
     }
@@ -157,7 +158,7 @@ public class AgentProxy {
     private static long copyLarge(InputStream input, OutputStream output, byte[] buffer) throws IOException {
         long count;
         int n;
-        for(count = 0L; -1 != (n = input.read(buffer)); count += (long)n) {
+        for(count = 0L; -1 != (n = input.read(buffer)); count += n) {
             output.write(buffer, 0, n);
         }
 

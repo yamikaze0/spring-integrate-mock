@@ -1,12 +1,8 @@
-package org.yamikaze.unittest.junit4;
+package org.yamikaze.unittest.junit4.parameterized;
 
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yamikaze.unittest.junit4.parameterized.Arguments;
-import org.yamikaze.unittest.junit4.parameterized.Param;
-import org.yamikaze.unittest.junit4.parameterized.ParamParser;
-import org.yamikaze.unittest.junit4.parameterized.ParameterDescriptor;
 import org.yamikaze.unittest.junit4.parameterized.converter.Converter;
 import org.yamikaze.unittest.junit4.parameterized.converter.ConverterFactory;
 import org.yamikaze.unittest.junit4.parameterized.converter.ParamConverter;

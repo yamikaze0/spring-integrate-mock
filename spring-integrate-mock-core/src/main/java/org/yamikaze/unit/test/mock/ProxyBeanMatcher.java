@@ -97,8 +97,8 @@ class ProxyBeanMatcher {
             }
 
             //针对dubbo需要特别处理 对于Mybatis Mapper也这样处理
-            if (Objects.equals(beanClassName, GlobalConfig.DUBBO_SERVICE_BEAN)
-                    || Objects.equals(beanClassName, GlobalConfig.APACHE_DUBBO_SERVICE_BEAN)
+            if (Objects.equals(beanClassName, Constants.DUBBO_SERVICE_BEAN)
+                    || Objects.equals(beanClassName, Constants.APACHE_DUBBO_SERVICE_BEAN)
                     || Objects.equals(beanClassName, "org.mybatis.spring.mapper.MapperFactoryBean")) {
                 //dubbo不能被其他cglib mock
                 proxyBeans.remove(beanName);

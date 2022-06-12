@@ -18,7 +18,7 @@ import static org.yamikaze.unit.test.mock.proxy.JdkInvocationHandler.recordAndAn
 public class CglibMethodInterceptor implements MethodInterceptor {
 
     @Override
-    public Object intercept(Object o, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+    public Object intercept(Object o, Method method, Object[] args, MethodProxy methodProxy) {
         InvocationMethod invocation = new InvocationMethod();
         invocation.setArgs(args);
         invocation.setMethod(method);

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.annotation.Order;
 import org.springframework.util.ClassUtils;
+import org.yamikaze.unit.test.mock.Constants;
+import org.yamikaze.unit.test.mock.ThreadPoolUtils;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -25,11 +27,7 @@ public class AsyncInitBeanPostProcessor implements BeanPostProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncInitBeanPostProcessor.class);
     private final ThreadPoolExecutor executor = ThreadPoolUtils.getFixExecutor(100, 200);
-    private final Class<?> referenceClass;
-
-    public AsyncInitBeanPostProcessor() {
-        referenceClass = getReferenceBeanClass();
-    }
+    private final Class<?> referenceClass = getReferenceBeanClass();
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -66,11 +64,11 @@ public class AsyncInitBeanPostProcessor implements BeanPostProcessor {
         return bean;
     }
 
-    private Class<?> getReferenceBeanClass() {
+    private static Class<?> getReferenceBeanClass() {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         Class<?> refClz = null;
         try {
-            refClz = ClassUtils.forName("org.apache.dubbo.config.spring.ReferenceBean", contextClassLoader);
+            refClz = ClassUtils.forName(Constants.APACHE_DUBBO_SERVICE_BEAN, contextClassLoader);
             LOGGER.info("Using Apache Dubbo....");
         } catch (ClassNotFoundException e) {
             //No-op
@@ -78,7 +76,7 @@ public class AsyncInitBeanPostProcessor implements BeanPostProcessor {
 
         if (refClz == null) {
             try {
-                refClz = ClassUtils.forName("com.alibaba.dubbo.config.spring.ReferenceBean", contextClassLoader);
+                refClz = ClassUtils.forName(Constants.DUBBO_SERVICE_BEAN, contextClassLoader);
                 LOGGER.info("Using Alibaba Dubbo....");
             } catch (ClassNotFoundException e) {
                 //No-op

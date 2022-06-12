@@ -16,8 +16,8 @@ public class ModifiedClassHolder {
         return MODIFIED_CLASSES.get(className);
     }
 
-    public static void put(String classname, Class<?> type) {
-        MODIFIED_CLASSES.put(classname, type);
+    public static Class<?> put(String classname, Class<?> type) {
+        return MODIFIED_CLASSES.put(classname, type);
     }
 
     public static boolean exist(String classname) {

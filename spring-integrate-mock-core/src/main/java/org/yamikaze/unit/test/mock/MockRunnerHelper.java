@@ -1,4 +1,4 @@
-package org.yamikaze.unit.test.mock.proxy;
+package org.yamikaze.unit.test.mock;
 
 import org.yamikaze.unit.test.mock.annotation.MockEnhance;
 

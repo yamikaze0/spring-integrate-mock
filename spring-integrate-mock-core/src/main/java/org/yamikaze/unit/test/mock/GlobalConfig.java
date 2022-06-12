@@ -1,10 +1,10 @@
 package org.yamikaze.unit.test.mock;
 
-import org.yamikaze.unit.test.handler.ExceptionHandlerSupport;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+
+import static org.yamikaze.unit.test.mock.Constants.APACHE_DUBBO_SERVICE_BEAN;
+import static org.yamikaze.unit.test.mock.Constants.DUBBO_SERVICE_BEAN;
 
 /**
  * @author qinluo
@@ -13,10 +13,6 @@ import java.util.Objects;
  * cs:off
  */
 public class GlobalConfig {
-
-    public static final String DUBBO_SERVICE_BEAN = "com.alibaba.dubbo.config.spring.ReferenceBean";
-    public static final String APACHE_DUBBO_SERVICE_BEAN = "org.apache.dubbo.config.spring.ReferenceBean";
-
 
     /**
      * 异常开关全局设置
@@ -58,7 +54,7 @@ public class GlobalConfig {
 
     private static boolean enableRealInvokeLog = false;
 
-    private static boolean useAgentProxy = false;
+    private static boolean useAgentProxy = true;
 
     static {
         mockClassPattern.add(DUBBO_SERVICE_BEAN);
@@ -233,20 +229,5 @@ public class GlobalConfig {
 
     public static boolean getSwitch() {
         return SWITCH;
-    }
-
-    public static void registerExceptionHandler(ExceptionHandlerSupport handler) {
-        Objects.requireNonNull(handler);
-        //ExtensionRule.registerExceptionHandler(handler);
-    }
-
-    private static boolean useLastPackage = false;
-
-    public static boolean getUseLastPackage() {
-        return useLastPackage;
-    }
-
-    public static void setUseLastPackage(boolean useLastPackage) {
-        GlobalConfig.useLastPackage = useLastPackage;
     }
 }

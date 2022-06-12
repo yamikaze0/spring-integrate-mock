@@ -5,9 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -29,20 +27,20 @@ public class MockBeanNameAutoProxyCreator extends BeanNameAutoProxyCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockBeanNameAutoProxyCreator.class);
 
-    private static List<Map<String, Class>> proxyTypeMapList = new ArrayList<>();
+    private static final List<Map<String, Class<?>>> PROXY_TYPE_MAP_LIST = new ArrayList<>();
 
-    private Map<String, Class> proxyClasses = new ConcurrentHashMap<>(36);
+    private final Map<String, Class<?>> proxyClasses = new ConcurrentHashMap<>(36);
 
+    @SuppressWarnings("unchecked")
     public MockBeanNameAutoProxyCreator() {
         Field proxyTypes = ReflectionUtils.findField(this.getClass(), "proxyTypes");
         if (proxyTypes != null) {
             proxyTypes.setAccessible(true);
             Object field = ReflectionUtils.getField(proxyTypes, this);
-            Map<String, Class> map = (Map<String, Class>)field;
-            proxyTypeMapList.add(map);
+            Map<String, Class<?>> map = (Map<String, Class<?>>)field;
+            PROXY_TYPE_MAP_LIST.add(map);
         }
-        proxyTypeMapList.add(proxyClasses);
-
+        PROXY_TYPE_MAP_LIST.add(proxyClasses);
     }
 
     @Override
@@ -53,31 +51,6 @@ public class MockBeanNameAutoProxyCreator extends BeanNameAutoProxyCreator {
         }
 
         return beanName;
-    }
-
-    private List<String> beanNames;
-
-
-    /**
-     * Set the names of the beans that should automatically get wrapped with proxies.
-     * A name can specify a prefix to match by ending with "*", e.g. "myBean,tx*"
-     * will match the bean named "myBean" and all beans whose name start with "tx".
-     * <p><b>NOTE:</b> In case of a FactoryBean, only the objects created by the
-     * FactoryBean will get proxied. This default behavior applies as of Spring 2.0.
-     * If you intend to proxy a FactoryBean instance itself (a rare use case, but
-     * Spring 1.2's default behavior), specify the bean name of the FactoryBean
-     * including the factory-bean prefix "&": e.g. "&myFactoryBean".
-     * @see org.springframework.beans.factory.FactoryBean
-     * @see org.springframework.beans.factory.BeanFactory#FACTORY_BEAN_PREFIX
-     */
-    @Override
-    public void setBeanNames(String... beanNames) {
-        Assert.notEmpty(beanNames, "'beanNames' must not be empty");
-        this.beanNames = new ArrayList<String>(beanNames.length);
-        for (String mappedName : beanNames) {
-            this.beanNames.add(StringUtils.trimWhitespace(mappedName));
-        }
-        super.setBeanNames(beanNames);
     }
 
     @Override
@@ -97,21 +70,17 @@ public class MockBeanNameAutoProxyCreator extends BeanNameAutoProxyCreator {
             return proxy;
         }
 
-        if (factoryBeanClass && beanNames.contains(beanName)) {
-            return DO_NOT_PROXY;
-        }
-
         return DO_NOT_PROXY;
     }
 
-    public static String findProxyClassBeanName(Class proxyClass) {
-        if (proxyClass == null || proxyTypeMapList.isEmpty()) {
+    public static String findProxyClassBeanName(Class<?> proxyClass) {
+        if (proxyClass == null || PROXY_TYPE_MAP_LIST.isEmpty()) {
             return null;
         }
 
-        for (Map<String, Class> proxyTypeMap : proxyTypeMapList) {
-            Set<Entry<String, Class>> entries = proxyTypeMap.entrySet();
-            for (Entry<String, Class> entry : entries) {
+        for (Map<String, Class<?>> proxyTypeMap : PROXY_TYPE_MAP_LIST) {
+            Set<Entry<String, Class<?>>> entries = proxyTypeMap.entrySet();
+            for (Entry<String, Class<?>> entry : entries) {
                 if (entry.getValue() == proxyClass) {
                     return entry.getKey();
                 }

@@ -10,9 +10,7 @@ import org.springframework.util.AntPathMatcher;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author qinluo
@@ -23,10 +21,7 @@ public class AsyncApplicationFactory extends DefaultListableBeanFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncApplicationFactory.class);
 
-    private static final ThreadPoolExecutor EXECUTOR
-            = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), Runtime.getRuntime().availableProcessors(), 0L,TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(10), Thread::new, new ThreadPoolExecutor.AbortPolicy());
-
+    private static final ThreadPoolExecutor EXECUTOR = ThreadPoolUtils.getFixExecutor(Runtime.getRuntime().availableProcessors(), 10);
 
     @Override
     protected void invokeInitMethods(String beanName, Object bean, RootBeanDefinition mbd) throws Throwable {

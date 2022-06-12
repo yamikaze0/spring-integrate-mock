@@ -1,4 +1,4 @@
-package org.yamikaze.unit.test.spring;
+package org.yamikaze.unit.test.mock;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
