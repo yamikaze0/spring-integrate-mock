@@ -212,10 +212,7 @@ public class MethodMockInterceptor implements MethodInterceptor {
 
     static void clear() {
         METHOD_KEY.clear();
-
-
         Profilers.dump();
         Profilers.clear();
-
     }
 }

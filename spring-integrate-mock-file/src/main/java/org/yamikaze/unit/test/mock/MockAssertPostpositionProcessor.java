@@ -14,7 +14,7 @@ public class MockAssertPostpositionProcessor implements PostpositionProcessor {
     @Override
     public void afterRealInvokeProcess(MethodInvokeTime mit, Object result, Object... args) {
         MockRecord mockRecord = Mockit.MOCKIT.getMockRecord();
-        Class clazz = mit.getDeclaringClass();
+        Class<?> clazz = mit.getDeclaringClass();
         Method method = mit.getMethod();
         if (mockRecord == null) {
             return;
@@ -26,7 +26,7 @@ public class MockAssertPostpositionProcessor implements PostpositionProcessor {
             recordAssertMap.get(mockKey).assertResult(result);
         } else {
             List<Class<?>> allInterfaces = ClassUtils.getAllSuperClassesAndInterfaces(clazz);
-            for (Class i : allInterfaces) {
+            for (Class<?> i : allInterfaces) {
                 String iMockKey = MockRecord.getMockKey(i, method);
                 if (recordAssertMap.containsKey(iMockKey)) {
                     recordAssertMap.get(iMockKey).assertResult(result);

@@ -28,6 +28,8 @@ public class MockSpringRegistry implements BeanDefinitionRegistryPostProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockSpringRegistry.class);
 
+    private static final String PROXY_BEAN_PREFIX = "org.yamikaze.unittest.mockInterceptorProxy#";
+
     /**
      * Internal sequence for generated bean name.
      */
@@ -83,7 +85,7 @@ public class MockSpringRegistry implements BeanDefinitionRegistryPostProcessor {
         propertyValues.addPropertyValue("proxyTargetClass", proxyTargetProxy);
 
         BeanDefinition proxyCreatorBeanDefinition = new RootBeanDefinition(MockBeanNameAutoProxyCreator.class, null, propertyValues);
-        registry.registerBeanDefinition("com.yt.buy.test.mockInterceptorProxy#" + next(), proxyCreatorBeanDefinition);
+        registry.registerBeanDefinition(PROXY_BEAN_PREFIX + next(), proxyCreatorBeanDefinition);
     }
 
     private long next() {

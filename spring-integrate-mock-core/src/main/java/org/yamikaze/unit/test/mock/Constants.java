@@ -41,4 +41,6 @@ public interface Constants {
      * Os file path separator
      */
     String LINE_SEPARATOR = java.security.AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty("line.separator"));
+
+    String JAVA = "java";
 }

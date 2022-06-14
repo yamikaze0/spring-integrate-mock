@@ -53,7 +53,7 @@ public class ExceptionCodeFactory {
     public static void registerByJson(String json) {
         Map<String, String> object;
         try {
-            object = (Map<String, String>)JsonObjectMapperProxy.decode(json, Map.class);
+            object = JsonObjectMapperProxy.decode(json, Map.class);
         } catch (Exception e) {
             throw new IllegalStateException("parse json error.", e);
         }

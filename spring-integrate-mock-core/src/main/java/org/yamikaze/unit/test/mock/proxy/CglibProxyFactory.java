@@ -2,6 +2,7 @@ package org.yamikaze.unit.test.mock.proxy;
 
 import org.springframework.cglib.core.NamingPolicy;
 import org.springframework.cglib.proxy.Enhancer;
+import org.yamikaze.unit.test.mock.Constants;
 
 /**
  * @author qinluo
@@ -12,13 +13,13 @@ public class CglibProxyFactory implements ProxyFactory {
 
     private static final CglibProxyFactory INSTANCE = new CglibProxyFactory();
 
-    public static final String PROXY_IDEN = "ByYtMockitoCGLIB";
+    public static final String PROXY_IDEN = "ByIntegrateMockitoCGLIB";
 
     private static final NamingPolicy NAMING_POLICY = (prefix, source, key, names) -> {
         if (prefix == null) {
             prefix = "org.springframework.cglib.empty.Object";
-        } else if (prefix.startsWith("java")) {
-            prefix = "$" + prefix;
+        } else if (prefix.startsWith(Constants.JAVA)) {
+            prefix = Constants.INTERNAL_CLASS_SYMBOL + prefix;
         }
 
         String base = prefix + "$$" + source.substring(source.lastIndexOf(46) + 1) + PROXY_IDEN + "$$" + Integer.toHexString(key.hashCode());

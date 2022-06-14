@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodType;
 
 /**
+ * InternalMockUtils, invoked by bytecode.
+ *
  * @author qinluo
  * @version 1.0.0
  * @date 2020-05-15 10:25

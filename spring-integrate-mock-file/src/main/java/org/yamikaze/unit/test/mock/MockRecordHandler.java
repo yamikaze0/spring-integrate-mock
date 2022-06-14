@@ -67,7 +67,7 @@ public class MockRecordHandler extends HandlerSupport {
         Mockit mockit = Mockit.MOCKIT;
         //first use current method, second use global config.
         boolean matchParams = mockit.getMatchParams() == null ?
-                (Mockit.getGlobalMatchParams() == null ? true : Mockit.getGlobalMatchParams()) : mockit.getMatchParams();
+                (Mockit.getGlobalMatchParams() == null || Mockit.getGlobalMatchParams()) : mockit.getMatchParams();
         String dir = mockit.getMockDataDir();
         File dirFile = new File(mockit.getAbsDir() + GlobalConfig.getSaveResourceLocation(), dir);
 

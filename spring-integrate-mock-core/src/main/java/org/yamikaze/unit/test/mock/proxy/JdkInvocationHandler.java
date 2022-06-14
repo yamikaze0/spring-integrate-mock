@@ -46,8 +46,8 @@ public class JdkInvocationHandler implements InvocationHandler {
             }
         }
 
-        if (MockUtils.getDoNothingAnswer() != null) {
-            recordBehavior.addAnswer(MockUtils.getDoNothingAnswer());
+        if (MockUtils.getNoopAnswerHolder() != null) {
+            recordBehavior.addAnswer(MockUtils.getNoopAnswerHolder());
             MockUtils.clear();
         }
 

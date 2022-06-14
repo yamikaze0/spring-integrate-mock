@@ -55,17 +55,30 @@ public class LocalFileDataWriter {
         return findUnCreated(dirFile, key, invokeTimes + 1);
     }
 
-
+    /**
+     * Local file data task, do write object to file.
+     */
     public static class LocalFileDataWriterTask {
 
-        private File parentFile;
+        /**
+         * The parent.
+         */
+        private final File parentFile;
 
-        private String key;
+        /**
+         * Invocation key as filename.
+         */
+        private final String key;
 
-        private int invokeTimes;
+        /**
+         * Invocation orders when same key.
+         */
+        private final int invokeTimes;
 
-        private MockData mockData;
-
+        /**
+         * Real-invoked parameters and results.
+         */
+        private final MockData mockData;
 
         public LocalFileDataWriterTask(File parentFile, String key, int invokeTimes, MockData mockData) {
             this.parentFile = parentFile;

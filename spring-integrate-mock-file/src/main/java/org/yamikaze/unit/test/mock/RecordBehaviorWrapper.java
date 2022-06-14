@@ -16,7 +16,7 @@ public class RecordBehaviorWrapper {
 
     private String key;
 
-    private List<ArgumentMatcher> argumentMatchers = new ArrayList<>(16);
+    private final List<ArgumentMatcher> argumentMatchers = new ArrayList<>(16);
 
     public RecordBehaviorWrapper(String key, List<ArgumentMatcher> argumentMatchers) {
         this.key = key;
@@ -33,10 +33,6 @@ public class RecordBehaviorWrapper {
 
     public List<ArgumentMatcher> getArgumentMatchers() {
         return argumentMatchers;
-    }
-
-    public void setArgumentMatchers(List<ArgumentMatcher> argumentMatchers) {
-        this.argumentMatchers = argumentMatchers;
     }
 
     public void addArgumentMatchers(List<ArgumentMatcher> argumentMatchers) {
