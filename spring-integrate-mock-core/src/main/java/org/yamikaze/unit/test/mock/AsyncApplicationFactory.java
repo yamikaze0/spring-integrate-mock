@@ -46,7 +46,7 @@ public class AsyncApplicationFactory extends DefaultListableBeanFactory {
 
     private boolean needAsyncInit(String beanName, Object bean) {
         List<String> patterns = GlobalConfig.getAsyncInitBeanPattern();
-        if (!GlobalConfig.isAsyncInitSwitch() || patterns == null || patterns.isEmpty()) {
+        if (!GlobalConfig.isAsyncInitEnabled() || patterns == null || patterns.isEmpty()) {
             return false;
         }
 

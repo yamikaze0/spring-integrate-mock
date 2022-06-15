@@ -273,7 +273,7 @@ public class InvokeTree {
             boolean isRealInvoke0 = this.hasRealInvoke();
 
             sb.append(prefix).append(message).append(" time = ").append(invokeTime).append("ms, mode = ");
-            String mode = (isMocked0 && isRealInvoke0) ? "mix" : isMocked0 ? "mock" : "real invoke";
+            String mode = (isMocked0 && isRealInvoke0) ? "mix" : isMocked0 ? "mock" : "real-invoke";
             sb.append(mode);
 
 

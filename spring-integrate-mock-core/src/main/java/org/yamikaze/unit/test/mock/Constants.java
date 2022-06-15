@@ -43,4 +43,8 @@ public interface Constants {
     String LINE_SEPARATOR = java.security.AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty("line.separator"));
 
     String JAVA = "java";
+
+    String CONFIG_CLASSNAME = GlobalConfig.class.getName().replace(CLASS_SEPARATOR, JVM_CLASS_SEPARATOR);
+    String MOCK_ENABLED_METHOD = "isMockEnabled";
+    String INTERNAL_MOCK_CLASSNAME = InternalMockUtils.class.getName().replace(CLASS_SEPARATOR, JVM_CLASS_SEPARATOR);
 }

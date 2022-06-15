@@ -57,7 +57,7 @@ public class MethodMockInterceptor implements MethodInterceptor {
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         Method method = invocation.getMethod();
-        if (MethodUtils.isBaseMethod(method) || !GlobalConfig.getSwitch()) {
+        if (MethodUtils.isBaseMethod(method) || !GlobalConfig.isMockEnabled()) {
             return invocation.proceed();
         }
 
@@ -76,6 +76,9 @@ public class MethodMockInterceptor implements MethodInterceptor {
             LOGGER.info("mockito mock. key = {}", methodInvokeTime.getKey());
             methodInvokeTime.mockInvoke();
             if (answerResult instanceof Throwable) {
+                if (isProfiler(methodInvokeTime)) {
+                    Profilers.closed(true);
+                }
                 throw (Throwable)answerResult;
             }
 

@@ -92,17 +92,7 @@ public class MockHandler implements Handler {
                     }
 
                     String code = p.getDataKey();
-                    boolean exception = p.isMockException();
-                    if (exception) {
-                        code = p.getMockExceptionCode();
-                        boolean useDataKey = p.getDataKey() != null
-                                && (code == null || ExceptionCodeFactory.COMMON_CODE.equals(code));
-                        if (useDataKey) {
-                            code = p.getDataKey();
-                        }
-                    }
-
-                    recordBehavior.addAnswer(new CodeAnswer(exception, code));
+                    recordBehavior.addAnswer(new CodeAnswer(code));
 
                 });
             });
@@ -123,12 +113,10 @@ public class MockHandler implements Handler {
 
     private MockConfig parseConfig(Mock mock) {
         MockConfig config = new MockConfig();
-        config.setDataKey(mock.dataKey());
+        config.setDataKey(mock.key());
         config.setMockClass(mock.clz());
         config.setMockData(mock.mockData());
-        config.setMockException(mock.mockException());
         config.setMockMethodPattern(mock.method());
-        config.setMockExceptionCode(mock.exceptionCode());
         return config;
     }
 

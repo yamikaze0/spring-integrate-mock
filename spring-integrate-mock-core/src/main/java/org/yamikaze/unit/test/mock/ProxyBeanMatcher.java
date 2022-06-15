@@ -64,7 +64,7 @@ class ProxyBeanMatcher {
     public boolean hasProxyBeans() {
         String[] beanDefinitionNames = registry.getBeanDefinitionNames();
         boolean hasProxyConfig = (!proxyBeanNamePatterns.isEmpty() || !proxyClassnamePatterns.isEmpty());
-        return beanDefinitionNames != null && beanDefinitionNames.length != 0 && hasProxyConfig;
+        return beanDefinitionNames.length != 0 && hasProxyConfig;
     }
 
     public List<String> getJdkProxyBeans() {

@@ -1,11 +1,22 @@
 # spring-integrate-mock
-a mock util in Spring context and dependency on junit4
+a mock util in Spring context and dependency on junit4/junit5
 
-# 使用步骤
+#功能列表
+- [X] 支持junit4/junit5
+- [X] junit4支持参数化测试
+- [X] 支持普通方法mock
+- [X] 支持私有、静态方法mock
+- [X] 支持DUBBO调用mock
+- [X] 支持Mybatis Mapper调用mock
+- [X] 支持调用路径打印（需要代理调用路径上的所有bean）
+- [X] 支持单测类/单测方法命名检查（类以Test开头/结尾，方法以test开头）
+- [X] 支持真实调用文件采集式mock
 
-## 0、前置依赖
+#使用步骤
+
+##前置依赖
 * JDK8
-* Junit4
+* Junit4/junit5
 * Spring4以及以上
 * 对象比较 https://github.com/yamikaze0/obj-compare
 
@@ -16,20 +27,28 @@ git clone https://github.com/yamikaze0/spring-integrate-mock.git
 cd spring-integrate-mock && mvn install -DskipTests=true
 ```
 
-* 引入依赖
+###1.1、junit4
 ```xml
 <dependency>
     <groupId>org.yamikaze</groupId>
-    <artifactId>spring-integrate-junit4-mock</artifactId>
-    <version>1.0.0</version>
+    <artifactId>spring-integrate-junit4</artifactId>
+    <version>1.0.1</version>
 </dependency>
 ```
 
-## 2、配置
-* 在Spring的context配置文件中引入以下配置
+###1.2、junit5
 ```xml
-<bean id="mockRegistry" class="com.yt.unit.test.mock.MockSpringRegistry">
-   <property name="ignoreBean">
+<dependency>
+    <groupId>org.yamikaze</groupId>
+    <artifactId>spring-integrate-junit5</artifactId>
+    <version>1.0.1</version>
+</dependency>
+```
+
+## 2、Spring Bean配置(必须)
+```xml
+<bean id="mockRegistry" class="org.yamikaze.unit.test.mock.MockSpringRegistry">
+   <property name="ignoreBeans">
        <list>
            <!--  需要过滤代理哪些bean       -->
            <value>org.springframework.*.**</value>
@@ -37,150 +56,163 @@ cd spring-integrate-mock && mvn install -DskipTests=true
    </property>
 </bean>
 ```
-* 代码中增加配置需要代理哪些bean
-```java
 
-    static {
-        // 通过匹配bean名称
-        GlobalConfig.addBeanNamePattern("*Service*");
-        GlobalConfig.addBeanNamePattern("*Adapter*");
-        GlobalConfig.addBeanNamePattern("*AO*");
-        // 通过Class对象
-        GlobalConfig.addMockClass(XXXAdapter.class);    
-    }
+##3、使用配置
+
+###3.1、junit4配置
+如果使用Spring自带的runner，还需要在测试类中加入配置
+```java
+@org.junit.Rule
+public org.yamikaze.unittest.junit4.ExtensionRule rule; // 必须声明为public
 ```
 
-* 在测试类上使用指定的Runner
+如果不需要上述配置可以使用
 ```java
-@RunWith(SpringJunitMockRunner.class)
-public class BaseTest extends AbstractJUnit4SpringContextTests {
-    
-}
+@RunWith(org.yamikaze.unittest.junit4.SpringJunitMockRunner.class)
+public class XXXTest {}
+```
+`SpringJunitMockRunner`会自动将`rule`生效
 
+###3.2、junit5配置
+junit配置比较简单，只需要在单测类上加入如下注解配置即可
+```java
+@ExtendWith(Junit5MethodEachCallback.class)
+public class XXXTest {}
 ```
 
-## 3、使用
+###3.3、配置代理的bean列表（必须）
+经过上述配置之后，还需要配置需要代理那些bean，支持多维度的bean配置，我们需要在Spring容器初始化前配置，所以
+一般在junit4中的`@BeforeClass`或者junit5中的`@BeforeAll`注解修饰的方法中进行配置，默认情况下，自动代理DUBBO reference bean
+，以下为配置示例
 
-### 3.1、mock某个bean方法1
+* Ant通配符形势的bean名称配置
 ```java
+GlobalConfig.addBeanNamePattern("*Adapter*");
+```
+* 不对DUBBO进行mock
+```java
+GlobalConfig.noMockDubbo();
+```
+* 某class需要进行配置
+```java
+GlobalConfig.addMockClass(UserService.class);
+```
 
-@AutoWired
-private XXXAdapter adapter;
+* 某class必须使用jdk代理
+```java
+GlobalConfig.addMustJdkMock(UserService.class);
+```
 
+* 以classname作为通配符进行匹配
+```java
+GlobalConfig.addMockPattern("com.xxx.xxx.xxx.*.**");
+```
+
+###3.4、其他配置
+
+* 开启/关闭mock
+```java
+GlobalConfig.setMockEnabled(true);
+```
+
+* 打印真实调用日志
+* 打印使用日志
+* 设置代理方式 cglib/java-native
+* 启用/禁用agent
+
+
+## 4、使用示例
+###4.1、使用注解形式
+
+```java
+// step1 使用@Mock注解声明方法的key
+@Mock(clz = UserService.class, method = "getUser", key = "mock-getUser")
 @Test
-public void testMockBeanMethod() {
-    XXXAdapter mockAdapter = MockFactory.create(XXXAdapter.class);
-    YamiMock.when(mockAdapter.someMethod(), true) // 匹配参数，false不匹配
-        .thenReturn(1);
+public void testUser() {
+    // step2: 使用DataCodeFactory注册key对应的返回值，注入的值可以是异常对象
+    User expect = new User();    
+    DataCodeFactory.register("mock-getUser", expect);
     
-    // 正常编写方法
-    int value = adapter.someMethod();    
-    Assert.assertTrue(value == 1);
+    // step3、userApi调用userService
+    User u = userApi.getUser(1L);
+    assert u == expect;
 }
-
 ```
 
-###3.2、mock某个bean方法2
+###4.2、mock-record形式
+使用类似easymock和mockit的形式
 ```java
-
-@AutoWired
-private XXXService service;
-
 @Test
-public void testMockBeanMethod() {
-    // 假设service的方法调用了某个adapter，想要mock adapter方法
-    XXXAdapter mockAdapter = MockFactory.create(XXXAdapter.class);
-    YamiMock.when(mockAdapter.someMethod(), true) // 匹配参数，false不匹配
-        .thenReturn(1);
+public void testGetUser() {
+    // step1: 使用MockUtils获取代理对象，并进行mock-record
+    UserMapper mock = MockUtils.createMock(UserMapper.class);
+    User expect = JSON.parseObject("{\"password\":\"123456\",\"salt\":\"hel\",\"phone\":\"13467830023\",\"id\":1,\"username\":\"4088586803\"}\n", User.class);
+    // when(T, boolean)的重载表示是否进行参数匹配，如果false或者默认方法，不会进行参数匹配
+    MockUtils.when(mock.selectById(1L), true).matchBean("xxxService").thenReturn(expect);
     
-    // 正常编写方法，不需要改变service对象的adapter属性
-    int value = service.someMethod();    
-    Assert.assertTrue(value == 1);
+    // step2: 调用userApi
+    User actual = userApi.getUser(1L);
+    assert actual == expect;
 }
 
 ```
 
-###3.3、mock返回值为void的方法
+###4.3、文件采集形式
+step1: 文件采集形式需要引入pom
+```xml
+<dependency>
+    <groupId>org.yamikaze</groupId>
+    <artifactId>spring-integrate-mock-file</artifactId>
+    <version>1.0.1</version>
+</dependency>
+```
+
+step2: 指定哪些接口需要采集调用结果
 ```java
-
-@AutoWired
-private XXXService service;
-
 @Test
-public void testMockBeanMethod() {
-    XXXAdapter mockAdapter = MockFactory.create(XXXAdapter.class);
-    YamiMock.when(mockAdapter).doNothing();
-    
-    // 正常编写方法，不需要改变service对象的adapter属性
-    int value = service.someMethod();    
-    Assert.assertTrue(value == 1);
+public void testGetUser() {
+    // 指定哪些接口需要采集，ant通配符形式
+    // mock(true)表示如果之前有采集的文件，会走mock的形式
+    Mockit.mock(true).mock(Arrays.asList(UserService.class.getName() + "*"));
+
+    User actual = userApi.getUser(1L);
+
+    System.out.println(actual.getId());
 }
 
 ```
 
-###3.4、mock静态方法与final方法
-* 在要测试的类上标注
+Tip: 文件采集的方式第一次运行会进行真实调用，如果真实调用的接口和方法能够匹配上指定的列表，会将调用
+的参数以及返回值以json文件的形式保存下来，默认保存在当前工作目录/mock下，文件路径为当前测试类的全称限定名+方法名，
+你也可以使用`GlobalConfig.setSaveResourceLocation(dir)`进行重新设置
+
+Tip2: 默认情况下，采集到的参数在进行mock时，会进行参数匹配，如果想要关闭匹配，可以使用`Mockit.mock(true).matchParams(false)`关闭方法全局参数匹配，或者进入到采集的文件，给json
+加上 matchParams = false的键值对
+
+###4.4、静态方法mock
+step1: 在单测方法上指定需要对哪些方法进行增强
 ```java
-@MockEnhance({StringUtils.class, RandomUtils.class}) // 例如需要mock apache common包的StringUtils和当前工程的工具类
-public class SomeTest {
-    
-}
-
+@MockEnhance(RandomUtils.class)
+public class XXXTest{}
 ```
 
-* 录制
-由于上述的录制都是基于代理的，static方法和final方法不能被代理，所以录制过程稍微麻烦一点
+step2: 在单测方法内完成录制
 ```java
-
-// 假设录制 StringUtils.isBlank无论什么情况都返回false
-YamiMock.mock(StringUtils.class)
-        .mockMethod("isBlank")
-        //.noParam() //指定方法无参数
-        .types(String.class) // 指定方法只有一个参数，类型为String
-        //.param("123") // 指定参数，只有当参数与指定参数相等时才执行mock，不指定则所有调用都会被mock
-        .result(false, false, true); // 第一次返回false，第二次返回false，第三次返回true，如果无返回值 调用doNothing
-
-// 假设录制 RandomUtils.randomNumber 第一次返回123，第二次返回456
-YamiMock.mock(RandomUtils.class).mockMethod("randomNumber").types(int.class).result("123", "456");
-
+// 表示对RandomUtils#randomString进行mock，方法参数为int，值为10，返回987654321
+MockUtils.mock(RandomUtils.class).mockMethod("randomString")
+        .types(int.class).param(10).result("987654321");
 ```
 
-### 3.5、支持参数化测试
-支持junit5类似的参数化测试
+##5、其他功能
 
-```java
-// 如果当前单测环境不需要跟Spring结合，可以使用此Runner
-@RunWith(JunitParameterizedRunner.class)
-public class ParameterizedTest {
-
-    @Test
-    @ParameterizedSource("parameterized/params.txt") // 使用注解指定单测用例的文件
-    public void testWithParams(String val, Integer value, Date date) {
-        System.out.println("name is " + val + " and value is " + value + " and date is " + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(date));
-    }
-
-    @Test
-    @ParameterizedSource("parameterized/params.xls")
-    public void testWithParamsXls(String val, Integer value, @Converter(DateConverter.class /* 支持自定义参数转换*/ ) Date date) {
-        System.out.println("name is " + val + " and value is " + value + " and date is " + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(date));
-    }
-
-    @Test
-    @ParameterizedSource("parameterized/params.xlsx") // 用例文件支持txt和xlsx、xls
-    public void testWithParamsXlsx(String val, Integer value, @Converter(DateConverter.class) Date date) {
-        System.out.println("name is " + val + " and value is " + value + " and date is " + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(date));
-    }
-}
-
-```
-
-单测用例文件内容(txt)
-```
-姓名  |   值   |  时间
-张三  |  123   | 2020-12-21 12:21:23
-李四  |  124   | 2020-12-21 12:21:23
-王武  | 125 | 2020-12-21 12:21:32
-yamikaze | 1 |  2020-12-21 11:22:23
-zhouyu | 2 | 2020-12-21 12:21:33
-wang wu | 3  | 2020-12-21 12:21:32
+###5.1、调用路径打印
+默认情况下，会对所有代理的bean以及静态mock的方法调用进行采集，然后打印，效果如下：
+```text
+2022-06-15 15:45:50.585 INFO  InvokeTree [InvokeTree.java:109] - Invoke Tree Dump:
+org.yamikaze.spring.mock.example.ApplicationTest#testGetUser time = 189ms, mode = mix
+|---UserApi#getUser time = 37ms, mode = mix
+    |---UserService#getUser time = 22ms, mode = mock
+    |   |---UserMapper#selectById time = 17ms, mode = mock
+    |       |---org.yamikaze.spring.mock.example.RandomUtils#randomString time = 0ms, mode = mock
+    |---UserLogService#log time = 4ms, mode = real-invoke
 ```
