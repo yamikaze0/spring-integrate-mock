@@ -15,14 +15,14 @@ import static org.yamikaze.unit.test.mock.Constants.DUBBO_SERVICE_BEAN;
 public class GlobalConfig {
 
     /**
-     * 异常开关全局设置
+     * Mock全局控制开关
      */
-    private static boolean SWITCH = true;
+    private static boolean mockEnabled = true;
 
     /**
      * 异步加载bean开关
      */
-    private static boolean ASYNC_INIT_SWITCH = true;
+    private static boolean asyncInitEnabled = true;
     /**
      * 异步加载的bean配置
      */
@@ -101,12 +101,11 @@ public class GlobalConfig {
         }
     }
 
-    public static void useCglibProxy() {
-        CGLIB_PROXY = true;
-    }
-
-    public static void useJdkProxy() {
-        CGLIB_PROXY = false;
+    /**
+     * 设置Spring使用何种代理方式
+     */
+    public static void useCglibProxy(boolean useCglibProxy) {
+        CGLIB_PROXY = useCglibProxy;
     }
 
     public static boolean isCglibProxy() {
@@ -135,6 +134,9 @@ public class GlobalConfig {
         mockBeanNamePattern.remove(pattern);
     }
 
+    /**
+     * 情况beanName pattern
+     */
     public static void noMockBean() {
         mockBeanNamePattern.clear();
     }
@@ -146,6 +148,7 @@ public class GlobalConfig {
 
     public static void noMock() {
         mockClassPattern.clear();
+        mockBeanNamePattern.clear();
     }
 
     public static void noMockDubbo() {
@@ -211,23 +214,19 @@ public class GlobalConfig {
 
     }
 
-    public static boolean isAsyncInitSwitch() {
-        return ASYNC_INIT_SWITCH;
+    public static boolean isAsyncInitEnabled() {
+        return GlobalConfig.asyncInitEnabled;
     }
 
-    public static void setAsyncInitSwitch(boolean asyncInitSwitch) {
-        ASYNC_INIT_SWITCH = asyncInitSwitch;
+    public static void setAsyncInitEnabled(boolean asyncInitEnabled) {
+        GlobalConfig.asyncInitEnabled = asyncInitEnabled;
     }
 
-    public static void resetSwitch(boolean flag) {
-        SWITCH = flag;
+    public static void setMockEnabled(boolean enabled) {
+        GlobalConfig.mockEnabled = enabled;
     }
 
-    public static void resetSwitch() {
-        resetSwitch(true);
-    }
-
-    public static boolean getSwitch() {
-        return SWITCH;
+    public static boolean isMockEnabled() {
+        return GlobalConfig.mockEnabled;
     }
 }

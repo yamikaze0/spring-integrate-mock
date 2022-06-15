@@ -18,8 +18,15 @@ import java.lang.invoke.MethodType;
 public class InternalMockUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InternalMockUtils.class);
+
+    /**
+     * Cannot rename this field, it used in bytecode.
+     */
     public static final Object NO_MOCK = new Object();
 
+    /**
+     * Cannot rename this method, it used in bytecode.
+     */
     public static Object findMockResult(String className, String methodName, String methodDesc, Object[] args) throws Throwable {
         Class<?> clz = ModifiedClassHolder.get(className);
         if (clz == null) {

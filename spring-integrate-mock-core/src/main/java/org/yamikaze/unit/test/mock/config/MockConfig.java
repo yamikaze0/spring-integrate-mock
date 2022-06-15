@@ -18,13 +18,6 @@ public class MockConfig {
     private String mockMethodPattern;
 
     /**
-     * 是否直接mock异常
-     */
-    private boolean mockException;
-
-    private String mockExceptionCode;
-
-    /**
      * 是否mock数据
      */
     private boolean mockData;
@@ -48,22 +41,6 @@ public class MockConfig {
 
     public void setMockMethodPattern(String mockMethodPattern) {
         this.mockMethodPattern = mockMethodPattern;
-    }
-
-    public boolean isMockException() {
-        return mockException;
-    }
-
-    public void setMockException(boolean mockException) {
-        this.mockException = mockException;
-    }
-
-    public String getMockExceptionCode() {
-        return mockExceptionCode;
-    }
-
-    public void setMockExceptionCode(String mockExceptionCode) {
-        this.mockExceptionCode = mockExceptionCode;
     }
 
     public boolean isMockData() {

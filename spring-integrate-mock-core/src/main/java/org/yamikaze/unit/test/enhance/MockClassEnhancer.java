@@ -9,6 +9,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
 import org.objectweb.asm.commons.JSRInlinerAdapter;
+import org.yamikaze.unit.test.mock.Constants;
 
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -171,7 +172,7 @@ public class MockClassEnhancer implements ClassEnhancer {
                 slots++;
             }
 
-            visitMethodInsn(Opcodes.INVOKESTATIC, "org/yamikaze/unit/test/mock/GlobalConfig", "getSwitch", "()Z", false);
+            visitMethodInsn(Opcodes.INVOKESTATIC, Constants.CONFIG_CLASSNAME, Constants.MOCK_ENABLED_METHOD, "()Z", false);
             Label label = new Label();
             mv.visitJumpInsn(Opcodes.IFEQ, label);
             Type returnType = Type.getReturnType(methodDesc);
@@ -182,11 +183,11 @@ public class MockClassEnhancer implements ClassEnhancer {
             visitLdcInsn(methodDesc);
             loadArgArray();
 
-            visitMethodInsn(Opcodes.INVOKESTATIC, "org/yamikaze/unit/test/mock/InternalMockUtils", "findMockResult", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", false);
+            visitMethodInsn(Opcodes.INVOKESTATIC, Constants.INTERNAL_MOCK_CLASSNAME, "findMockResult", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", false);
             visitVarInsn(Opcodes.ASTORE, slots);
             visitVarInsn(Opcodes.ALOAD, slots);
 
-            visitFieldInsn(GETSTATIC, "org/yamikaze/unit/test/mock/InternalMockUtils", "NO_MOCK", "Ljava/lang/Object;");
+            visitFieldInsn(GETSTATIC, Constants.INTERNAL_MOCK_CLASSNAME, "NO_MOCK", "Ljava/lang/Object;");
             mv.visitJumpInsn(Opcodes.IF_ACMPEQ, label);
 
             int returnOpcodes = Opcodes.RETURN;

@@ -34,18 +34,6 @@ public @interface Mock {
     String method() default "*";
 
     /**
-     * 是否直接mock异常
-     * @return mock异常
-     */
-    boolean mockException() default false;
-
-    /**
-     * 需要mock的异常code
-     * @return 异常code
-     */
-    String exceptionCode() default "normal";
-
-    /**
      * 是否进行返回值模拟
      * @return 默认进行返回值模拟
      */
@@ -55,5 +43,5 @@ public @interface Mock {
      * 默认的返回值key
      * @return object
      */
-    String dataKey() default "object";
+    String key() default "object";
 }
