@@ -100,7 +100,7 @@ public void testMockBeanMethod() {
 
 ```
 
-###3.2、mock返回值为void的方法
+###3.3、mock返回值为void的方法
 ```java
 
 @AutoWired
@@ -143,4 +143,44 @@ YamiMock.mock(StringUtils.class)
 // 假设录制 RandomUtils.randomNumber 第一次返回123，第二次返回456
 YamiMock.mock(RandomUtils.class).mockMethod("randomNumber").types(int.class).result("123", "456");
 
+```
+
+### 3.5、支持参数化测试
+支持junit5类似的参数化测试
+
+```java
+// 如果当前单测环境不需要跟Spring结合，可以使用此Runner
+@RunWith(JunitParameterizedRunner.class)
+public class ParameterizedTest {
+
+    @Test
+    @ParameterizedSource("parameterized/params.txt") // 使用注解指定单测用例的文件
+    public void testWithParams(String val, Integer value, Date date) {
+        System.out.println("name is " + val + " and value is " + value + " and date is " + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(date));
+    }
+
+    @Test
+    @ParameterizedSource("parameterized/params.xls")
+    public void testWithParamsXls(String val, Integer value, @Converter(DateConverter.class /* 支持自定义参数转换*/ ) Date date) {
+        System.out.println("name is " + val + " and value is " + value + " and date is " + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(date));
+    }
+
+    @Test
+    @ParameterizedSource("parameterized/params.xlsx") // 用例文件支持txt和xlsx、xls
+    public void testWithParamsXlsx(String val, Integer value, @Converter(DateConverter.class) Date date) {
+        System.out.println("name is " + val + " and value is " + value + " and date is " + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(date));
+    }
+}
+
+```
+
+单测用例文件内容(txt)
+```
+姓名  |   值   |  时间
+张三  |  123   | 2020-12-21 12:21:23
+李四  |  124   | 2020-12-21 12:21:23
+王武  | 125 | 2020-12-21 12:21:32
+yamikaze | 1 |  2020-12-21 11:22:23
+zhouyu | 2 | 2020-12-21 12:21:33
+wang wu | 3  | 2020-12-21 12:21:32
 ```
