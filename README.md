@@ -1,7 +1,7 @@
 # spring-integrate-mock
 a mock util in Spring context and dependency on junit4/junit5
 
-#功能列表
+# 功能列表
 - [X] 支持junit4/junit5
 - [X] junit4支持参数化测试
 - [X] 支持普通方法mock
@@ -12,9 +12,9 @@ a mock util in Spring context and dependency on junit4/junit5
 - [X] 支持单测类/单测方法命名检查（类以Test开头/结尾，方法以test开头）
 - [X] 支持真实调用文件采集式mock
 
-#使用步骤
+# 使用步骤
 
-##前置依赖
+## 前置依赖
 * JDK8
 * Junit4/junit5
 * Spring4以及以上
@@ -27,7 +27,7 @@ git clone https://github.com/yamikaze0/spring-integrate-mock.git
 cd spring-integrate-mock && mvn install -DskipTests=true
 ```
 
-###1.1、junit4
+### 1.1、junit4
 ```xml
 <dependency>
     <groupId>org.yamikaze</groupId>
@@ -36,7 +36,7 @@ cd spring-integrate-mock && mvn install -DskipTests=true
 </dependency>
 ```
 
-###1.2、junit5
+### 1.2、junit5
 ```xml
 <dependency>
     <groupId>org.yamikaze</groupId>
@@ -57,9 +57,9 @@ cd spring-integrate-mock && mvn install -DskipTests=true
 </bean>
 ```
 
-##3、使用配置
+## 3、使用配置
 
-###3.1、junit4配置
+### 3.1、junit4配置
 如果使用Spring自带的runner，还需要在测试类中加入配置
 ```java
 @org.junit.Rule
@@ -73,14 +73,14 @@ public class XXXTest {}
 ```
 `SpringJunitMockRunner`会自动将`rule`生效
 
-###3.2、junit5配置
+### 3.2、junit5配置
 junit配置比较简单，只需要在单测类上加入如下注解配置即可
 ```java
 @ExtendWith(Junit5MethodEachCallback.class)
 public class XXXTest {}
 ```
 
-###3.3、配置代理的bean列表（必须）
+### 3.3、配置代理的bean列表（必须）
 经过上述配置之后，还需要配置需要代理那些bean，支持多维度的bean配置，我们需要在Spring容器初始化前配置，所以
 一般在junit4中的`@BeforeClass`或者junit5中的`@BeforeAll`注解修饰的方法中进行配置，默认情况下，自动代理DUBBO reference bean
 ，以下为配置示例
@@ -108,7 +108,7 @@ GlobalConfig.addMustJdkMock(UserService.class);
 GlobalConfig.addMockPattern("com.xxx.xxx.xxx.*.**");
 ```
 
-###3.4、其他配置
+### 3.4、其他配置
 
 * 开启/关闭mock
 ```java
@@ -122,7 +122,7 @@ GlobalConfig.setMockEnabled(true);
 
 
 ## 4、使用示例
-###4.1、使用注解形式
+### 4.1、使用注解形式
 
 ```java
 // step1 使用@Mock注解声明方法的key
@@ -139,7 +139,7 @@ public void testUser() {
 }
 ```
 
-###4.2、mock-record形式
+### 4.2、mock-record形式
 使用类似easymock和mockit的形式
 ```java
 @Test
@@ -157,7 +157,7 @@ public void testGetUser() {
 
 ```
 
-###4.3、文件采集形式
+### 4.3、文件采集形式
 step1: 文件采集形式需要引入pom
 ```xml
 <dependency>
@@ -189,7 +189,7 @@ Tip: 文件采集的方式第一次运行会进行真实调用，如果真实调
 Tip2: 默认情况下，采集到的参数在进行mock时，会进行参数匹配，如果想要关闭匹配，可以使用`Mockit.mock(true).matchParams(false)`关闭方法全局参数匹配，或者进入到采集的文件，给json
 加上 matchParams = false的键值对
 
-###4.4、静态方法mock
+### 4.4、静态方法mock
 step1: 在单测方法上指定需要对哪些方法进行增强
 ```java
 @MockEnhance(RandomUtils.class)
@@ -203,9 +203,9 @@ MockUtils.mock(RandomUtils.class).mockMethod("randomString")
         .types(int.class).param(10).result("987654321");
 ```
 
-##5、其他功能
+## 5、其他功能
 
-###5.1、调用路径打印
+### 5.1、调用路径打印
 默认情况下，会对所有代理的bean以及静态mock的方法调用进行采集，然后打印，效果如下：
 ```text
 2022-06-15 15:45:50.585 INFO  InvokeTree [InvokeTree.java:109] - Invoke Tree Dump:
