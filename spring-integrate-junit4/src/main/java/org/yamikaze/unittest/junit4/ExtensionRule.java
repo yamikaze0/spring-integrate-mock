@@ -9,7 +9,7 @@ import org.yamikaze.unit.test.degrade.DegradeUtils;
 import org.yamikaze.unit.test.handler.Handler;
 import org.yamikaze.unit.test.handler.ThrowExceptionHandler;
 import org.yamikaze.unit.test.mock.ClassUtils;
-import org.yamikaze.unit.test.mock.RecordBehaviorList;
+import org.yamikaze.unit.test.mock.MockContextUtils;
 import org.yamikaze.unit.test.mock.event.Event;
 import org.yamikaze.unit.test.mock.event.EventListener;
 import org.yamikaze.unit.test.mock.event.TestFinishedEvent;
@@ -85,6 +85,9 @@ public class ExtensionRule implements TestRule {
             descriptor.setMethod(ClassUtils.findMethod(description.getTestClass(), description.getMethodName()));
             descriptor.setfAnnotations(description.getAnnotations().toArray(new Annotation[0]));
 
+            // prepare context
+            MockContextUtils.prepare();
+
             //first checker
             touchChecker(descriptor);
 
@@ -105,7 +108,9 @@ public class ExtensionRule implements TestRule {
                 });
 
                 afterHandler(descriptor);
-                RecordBehaviorList.INSTANCE.clear();
+
+                // disable invoke tree log
+                MockContextUtils.clear();
             }
 
         }

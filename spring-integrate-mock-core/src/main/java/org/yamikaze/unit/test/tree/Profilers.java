@@ -14,6 +14,11 @@ public class Profilers {
     private static final Logger LOGGER = LoggerFactory.getLogger(Profilers.class);
 
     /**
+     * Profilers log enabled control in thread scope.
+     */
+    private static final ThreadLocal<Boolean> ENABLED_HOLDER = ThreadLocal.withInitial(() -> false);
+
+    /**
      * Invoke tree for current invoke.
      */
     private static final ThreadLocal<InvokeTree> INVOKE_TREE = new ThreadLocal<>();
@@ -84,5 +89,20 @@ public class Profilers {
         }
 
         invokeTree.dump();
+    }
+
+    /**
+     * Enable invoke tree map.
+     */
+    public static void enable() {
+        ENABLED_HOLDER.set(true);
+    }
+
+    public static boolean enabled() {
+        return ENABLED_HOLDER.get();
+    }
+
+    public static void disable() {
+        ENABLED_HOLDER.remove();
     }
 }

@@ -13,11 +13,9 @@ import java.lang.reflect.Method;
  */
 public class MockRecordArgumentMatcher extends DefaultArgumentMatcher {
 
-    private Object expectParam;
-
-    private Method method;
-
-    private int parameterIndex;
+    private final Object expectParam;
+    private final Method method;
+    private final int parameterIndex;
 
     public MockRecordArgumentMatcher(Object expectParam, Method method, int parameterIndex) {
         super(expectParam, method, parameterIndex);

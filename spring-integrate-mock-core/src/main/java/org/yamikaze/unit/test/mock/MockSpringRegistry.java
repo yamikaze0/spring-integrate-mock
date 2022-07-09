@@ -42,8 +42,7 @@ public class MockSpringRegistry implements BeanDefinitionRegistryPostProcessor {
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        ProxyBeanMatcher matcher = new ProxyBeanMatcher(ignoreBeans, registry, GlobalConfig.mockBeanNamePattern,
-                                                        GlobalConfig.mockClassPattern, GlobalConfig.mustJdkMockClassPattern);
+        ProxyBeanMatcher matcher = new ProxyBeanMatcher(ignoreBeans, registry, GlobalConfig.proxy());
         // 无代理配置或者无bean
         if (!matcher.hasProxyBeans()) {
             return;

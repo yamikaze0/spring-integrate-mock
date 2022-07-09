@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +39,7 @@ public class MockRecordHandler extends HandlerSupport {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockRecordHandler.class);
 
-    private static Comparator<Answer> comparator = (o1, o2) -> {
+    private static final Comparator<Answer> COMPARATOR = (o1, o2) -> {
         if (!(o1 instanceof OrderedAnswer) || !(o2 instanceof OrderedAnswer)) {
             return 0;
         }
@@ -48,7 +49,7 @@ public class MockRecordHandler extends HandlerSupport {
 
         return Integer.compare(order1, order2);
     };
-    private static final Map<String, Class> PRIMITIVE_TYPES = new HashMap<>(16);
+    private static final Map<String, Class<?>> PRIMITIVE_TYPES = new HashMap<>(16);
 
     static {
         PRIMITIVE_TYPES.put("boolean", boolean.class);
@@ -103,12 +104,12 @@ public class MockRecordHandler extends HandlerSupport {
             String paramTypes = name.substring(paramTypesStartIndex + 1, paramTypesEndIndex);
 
             String[] split = paramTypes.trim().length() == 0 ? new String[0] : paramTypes.split("[,]+");
-            Class[] params = new Class[split.length];
+            Class<?>[] params = new Class[split.length];
 
             boolean occurredUnknownClz = false;
             int i = 0;
             for (String clz : split) {
-                Class paramClz = forName(clz.trim());
+                Class<?> paramClz = forName(clz.trim());
                 if (paramClz == null) {
                     occurredUnknownClz = true;
                     LOGGER.error("parse mock file occurred unknown clz {}", clz);
@@ -118,7 +119,7 @@ public class MockRecordHandler extends HandlerSupport {
                 params[i++] = paramClz;
             }
 
-            Class targetClass = forName(className);
+            Class<?> targetClass = forName(className);
             if (targetClass == null) {
                 LOGGER.error("parse mock file occurred unknown clz {}", className);
                 occurredUnknownClz = true;
@@ -169,8 +170,7 @@ public class MockRecordHandler extends HandlerSupport {
             recordBehavior.addAnswer(answer);
         }
 
-        recordBehaviorMap.forEach((k, v) -> v.getAnswers().sort(comparator));
-        RecordBehaviorList.INSTANCE.addRecordBehavior(new MockRecordBehavior());
+        recordBehaviorMap.forEach((k, v) -> v.getAnswers().sort(COMPARATOR));
     }
 
     private List<ArgumentMatcher> parseArgumentMatchers(MockData mockData, Method method) {
@@ -193,7 +193,7 @@ public class MockRecordHandler extends HandlerSupport {
 
         Type[] genericParameterTypes = method.getGenericParameterTypes();
         try {
-            for (Class parameterType : parameterTypes) {
+            for (Class<?> parameterType : parameterTypes) {
                 String paramJson = params.get(paramIndex);
 
                 Type type = parameterType;
@@ -215,7 +215,7 @@ public class MockRecordHandler extends HandlerSupport {
         return argumentMatchers;
     }
 
-    private static Class forName(String className) {
+    private static Class<?> forName(String className) {
         if (PRIMITIVE_TYPES.containsKey(className)) {
             return PRIMITIVE_TYPES.get(className);
         }
@@ -233,7 +233,7 @@ public class MockRecordHandler extends HandlerSupport {
             arrayDimension = (className.length() - originClassName.length()) / 2;
         }
 
-        Class clz;
+        Class<?> clz;
         try  {
             if (PRIMITIVE_TYPES.containsKey(originClassName)) {
                 clz = PRIMITIVE_TYPES.get(originClassName);
@@ -247,9 +247,7 @@ public class MockRecordHandler extends HandlerSupport {
 
         if (isArrayClass) {
             int[] dimensions = new int[arrayDimension];
-            for (int i = 0; i < dimensions.length; i++) {
-                dimensions[i] = 1;
-            }
+            Arrays.fill(dimensions, 1);
 
             Object obj = Array.newInstance(clz, dimensions);
             clz = obj.getClass();
@@ -323,9 +321,8 @@ public class MockRecordHandler extends HandlerSupport {
     }
 
     public static class OrderedAnswer extends AbstractAnswer {
-        private int order;
-
-        private LocalFileDataAnswer answer;
+        private final int order;
+        private final LocalFileDataAnswer answer;
 
         OrderedAnswer(int order, LocalFileDataAnswer answer) {
             this.order = order;

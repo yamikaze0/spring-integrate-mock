@@ -21,6 +21,11 @@ public interface Constants {
     String APACHE_DUBBO_SERVICE_BEAN = "org.apache.dubbo.config.spring.ReferenceBean";
 
     /**
+     * Mybatis mapper factory bean
+     */
+    String MAPPER_BEAN = "org.mybatis.spring.mapper.MapperFactoryBean";
+
+    /**
      * Internal class symbol in full classname
      */
     String INTERNAL_CLASS_SYMBOL = "$";

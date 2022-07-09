@@ -1,11 +1,14 @@
-package org.yamikaze.unit.test.mock;
+package org.yamikaze.unit.test.enhance;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yamikaze.unit.test.enhance.MockClassEnhancer;
+import org.yamikaze.unit.test.mock.Constants;
+import org.yamikaze.unit.test.mock.GlobalConfig;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.security.ProtectionDomain;
@@ -21,6 +24,14 @@ public class EnhancerProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancerProxy.class);
 
+    /**
+     * Enhance class occurred error.
+     */
+    public static final byte[] ENHANCE_ERR = new byte[0];
+
+    /**
+     * Enhance class with agent.
+     */
     public static void enhanceClasses(List<Class<?>> enhanceClasses) throws UnmodifiableClassException {
         if (enhanceClasses == null || enhanceClasses.isEmpty()) {
             return;
@@ -73,5 +84,51 @@ public class EnhancerProxy {
         }
 
 
+    }
+
+    /**
+     * Enhance class without agent.
+     */
+    public static byte[] enhance(Class<?> clz, ModifyConfig config) {
+        String resourceName = clz.getName().replace(".", "/") + ".class";
+        InputStream resource = ClassLoader.getSystemResourceAsStream(resourceName);
+        if (resource == null) {
+            return ENHANCE_ERR;
+        }
+
+        byte[] classFileBytes;
+        try {
+            classFileBytes = readStream(resource);
+        } catch (IOException e) {
+            LOGGER.error("read stream error, class = {}, e = {}", resourceName, e);
+            return ENHANCE_ERR;
+        }
+
+        if (config != null && !config.getNeedModify()) {
+            return classFileBytes;
+        }
+
+        ClassEnhancer classEnhancer = new MockClassEnhancer(classFileBytes);
+
+        try {
+            return classEnhancer.enhanceClass();
+        } catch (Exception e) {
+            LOGGER.error("enhance class {} error, e = {}", resourceName, e);
+        }
+
+        return ENHANCE_ERR;
+    }
+
+    private static byte[] readStream(final InputStream inputStream) throws IOException {
+
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            byte[] data = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(data, 0, data.length)) != -1) {
+                outputStream.write(data, 0, bytesRead);
+            }
+            outputStream.flush();
+            return outputStream.toByteArray();
+        }
     }
 }
