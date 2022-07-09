@@ -22,9 +22,6 @@ public class Mockit {
     private String absDir;
     private boolean cleanUnusedMockFile;
     private Boolean matchParams;
-
-
-    private MockRecord mockRecord;
     /**
      * 场景code
      */
@@ -55,18 +52,7 @@ public class Mockit {
         MOCKIT.className = null;
         MOCKIT.absDir = null;
         MOCKIT.sceneCode = null;
-        MOCKIT.mockRecord = null;
         MOCKIT.cleanUnusedMockFile = false;
-    }
-
-    /**
-     * 自定义Mock结果
-     *
-     * @param mockRecord
-     */
-    public Mockit mock(MockRecord mockRecord) {
-        this.mockRecord = mockRecord;
-        return this;
     }
 
     public Mockit matchParam(boolean matchParams) {
@@ -85,16 +71,6 @@ public class Mockit {
     public Boolean getMatchParams() {
         return matchParams;
     }
-
-    public String getMockRecordKey(Class clazz) {
-        return clazz.getName();
-    }
-
-
-    public MockRecord getMockRecord() {
-        return mockRecord;
-    }
-
 
     public String getAbsDir() {
         return absDir;

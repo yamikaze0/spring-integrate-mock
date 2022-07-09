@@ -1,4 +1,4 @@
-package org.yamikaze.unit.test.mock;
+package org.yamikaze.unit.test.enhance;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

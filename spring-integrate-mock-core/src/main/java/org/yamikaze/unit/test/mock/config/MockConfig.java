@@ -18,11 +18,6 @@ public class MockConfig {
     private String mockMethodPattern;
 
     /**
-     * 是否mock数据
-     */
-    private boolean mockData;
-
-    /**
      * dataKey
      */
     private String dataKey;
@@ -41,14 +36,6 @@ public class MockConfig {
 
     public void setMockMethodPattern(String mockMethodPattern) {
         this.mockMethodPattern = mockMethodPattern;
-    }
-
-    public boolean isMockData() {
-        return mockData;
-    }
-
-    public void setMockData(boolean mockData) {
-        this.mockData = mockData;
     }
 
     public String getDataKey() {

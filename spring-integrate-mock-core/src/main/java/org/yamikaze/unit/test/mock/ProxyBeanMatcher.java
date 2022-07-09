@@ -2,8 +2,13 @@ package org.yamikaze.unit.test.mock;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.ReflectionUtils;
+import org.yamikaze.unit.test.mock.config.ProxyConfig;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,35 +32,18 @@ class ProxyBeanMatcher {
      */
     private final BeanDefinitionRegistry registry;
 
-    /**
-     * The will proxied bean name patterns.
-     */
-    private final List<String> proxyBeanNamePatterns;
-
-    /**
-     * The will proxied classname patterns.
-     */
-    private final List<String> proxyClassnamePatterns;
-
-    /**
-     * The collections classnames that must use jdk proxy.
-     */
-    private final List<String> mustJdkProxyClassnames;
+    private final ProxyConfig conf;
 
     private final List<String> jdkProxyBeans = new ArrayList<>(128);
-
     private final List<String> proxyBeans = new ArrayList<>(256);
 
-    public ProxyBeanMatcher(List<String> ignoreClassPatterns, BeanDefinitionRegistry registry,
-                            List<String> proxyBeanNamePatterns, List<String> proxyClassnamePatterns,
-                            List<String> mustJdkProxyClassnames) {
+    public ProxyBeanMatcher(List<String> ignoreClassPatterns, BeanDefinitionRegistry registry, ProxyConfig proxyConf) {
         // 忽略spring框架自身的类
         this.ignoreClassPatterns.add("org.springframework.*");
+        this.ignoreClassPatterns.add("org.yamikaze.unittest.*");
         this.ignoreClassPatterns.addAll(ignoreClassPatterns);
         this.registry = registry;
-        this.proxyBeanNamePatterns = proxyBeanNamePatterns;
-        this.proxyClassnamePatterns = proxyClassnamePatterns;
-        this.mustJdkProxyClassnames = mustJdkProxyClassnames;
+        this.conf = proxyConf;
     }
 
     /**
@@ -63,8 +51,7 @@ class ProxyBeanMatcher {
      */
     public boolean hasProxyBeans() {
         String[] beanDefinitionNames = registry.getBeanDefinitionNames();
-        boolean hasProxyConfig = (!proxyBeanNamePatterns.isEmpty() || !proxyClassnamePatterns.isEmpty());
-        return beanDefinitionNames.length != 0 && hasProxyConfig;
+        return beanDefinitionNames.length != 0 && conf.hasProxyConf();
     }
 
     public List<String> getJdkProxyBeans() {
@@ -81,35 +68,33 @@ class ProxyBeanMatcher {
 
         for(String beanName : beanDefinitionNames) {
             BeanDefinition beanDefinition = registry.getBeanDefinition(beanName);
-            String beanClassName = beanDefinition.getBeanClassName();
+            String beanClassName = getResolvedType(beanDefinition);
             String factoryClass = beanDefinition.getFactoryBeanName();
 
             // 需要忽略代理的bean
             if (matchPattern(ignoreClassPatterns, beanClassName)
-                    || matchPattern(ignoreClassPatterns, factoryClass) ) {
+                    || matchPattern(ignoreClassPatterns, factoryClass)) {
                 continue;
             }
 
-            // 没有被匹配
-            if (!matchPattern(proxyBeanNamePatterns, beanName) &&
-                    !matchPattern(proxyClassnamePatterns, beanClassName)) {
+            // bean blacklist intercepted
+            if (matchPattern(conf.getBeanBlacklist(), beanName)) {
                 continue;
             }
 
-            //针对dubbo需要特别处理 对于Mybatis Mapper也这样处理
-            if (Objects.equals(beanClassName, Constants.DUBBO_SERVICE_BEAN)
-                    || Objects.equals(beanClassName, Constants.APACHE_DUBBO_SERVICE_BEAN)
-                    || Objects.equals(beanClassName, "org.mybatis.spring.mapper.MapperFactoryBean")) {
-                //dubbo不能被其他cglib mock
-                proxyBeans.remove(beanName);
+            // bean class blacklist intercepted
+            if (matchPattern(conf.getClassnameBlacklist(), beanClassName)) {
+                continue;
+            }
 
-                jdkProxyBeans.remove(beanName);
-                jdkProxyBeans.add(beanName);
+            // bean/class white intercepted
+            if (!matchPattern(conf.getBeanWhitelist(), beanName)
+                    && !matchPattern(conf.getClassnameWhitelist(), beanClassName)) {
                 continue;
             }
 
             //Must use jdk proxy.
-            if (mustJdkProxyClassnames.contains(beanClassName)) {
+            if (matchPattern(conf.getForceJdkProxyWhitelist(), beanClassName)) {
                 jdkProxyBeans.remove(beanName);
                 jdkProxyBeans.add(beanName);
 
@@ -135,5 +120,49 @@ class ProxyBeanMatcher {
         }
 
         return false;
+    }
+
+    private String getResolvedType(BeanDefinition definition) {
+        String defaultClassname = definition.getBeanClassName();
+        if (defaultClassname != null) {
+            return defaultClassname;
+        }
+
+        Method getResolvableType = ReflectionUtils.findMethod(BeanDefinition.class, "getResolvableType");
+
+        if (getResolvableType != null) {
+            getResolvableType.setAccessible(true);
+            ResolvableType resolvableType = (ResolvableType)ReflectionUtils.invokeMethod(getResolvableType, definition);
+            if (resolvableType == null || resolvableType == ResolvableType.NONE) {
+                return null;
+            }
+
+            return resolvableType.getType().getTypeName();
+        }
+
+        // resolvableType == null getResolvedFactoryMethod
+        Method getResolvedFactoryMethod = ReflectionUtils.findMethod(definition.getClass(), "getResolvedFactoryMethod");
+        if (getResolvedFactoryMethod == null) {
+            return null;
+        }
+
+        getResolvedFactoryMethod.setAccessible(true);
+        Method m = (Method)ReflectionUtils.invokeMethod(getResolvedFactoryMethod, definition);
+        if (m != null) {
+            return m.getReturnType().getName();
+        }
+
+        Method getFactoryMethodMetadata = ReflectionUtils.findMethod(definition.getClass(), "getFactoryMethodMetadata");
+        if (getFactoryMethodMetadata == null) {
+            return null;
+        }
+
+        getFactoryMethodMetadata.setAccessible(true);
+        MethodMetadata mm = (MethodMetadata)ReflectionUtils.invokeMethod(getFactoryMethodMetadata, definition);
+        if (mm != null) {
+            return mm.getReturnTypeName();
+        }
+
+        return null;
     }
 }

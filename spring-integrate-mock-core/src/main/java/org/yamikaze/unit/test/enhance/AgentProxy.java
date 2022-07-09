@@ -1,8 +1,9 @@
-package org.yamikaze.unit.test.mock;
+package org.yamikaze.unit.test.enhance;
 
 import com.sun.tools.attach.VirtualMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yamikaze.unit.test.mock.VmUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,8 +13,10 @@ import java.io.OutputStream;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
+ *
  * @author qinluo
  * @version 1.0.0
  * @date 2020-09-15 19:27
@@ -31,6 +34,7 @@ public class AgentProxy {
     private static volatile boolean attached;
     private static volatile VirtualMachine attachedVm;
     private static File agentFile = null;
+    private static final ReentrantLock LOAD_LOCK = new ReentrantLock();
 
     static {
         registerCleaner();
@@ -49,11 +53,14 @@ public class AgentProxy {
     }
 
     public static void initAgent() {
-        if (init) {
-            return;
-        }
+        // lock
+        LOAD_LOCK.lock();
 
         try {
+            if (init) {
+                return;
+            }
+
             int pid = VmUtils.getVmPid();
             if (pid <= 0) {
                 return;
@@ -85,6 +92,8 @@ public class AgentProxy {
                 }
             } catch (Exception ignored) {
             }
+        } finally {
+            LOAD_LOCK.unlock();
         }
 
     }
@@ -101,11 +110,12 @@ public class AgentProxy {
             }
         }
 
-        if (agentFile != null) {
+        if (attached && agentFile != null) {
             LOGGER.info("delete agent temp file {}", agentFile.getAbsolutePath());
             //noinspection ResultOfMethodCallIgnored
             agentFile.delete();
         }
+        attached = false;
     }
 
     public static Instrumentation getInst() {
@@ -140,8 +150,6 @@ public class AgentProxy {
      *  Copy methods from Apache common.io IOUtils
      *  cs:off
      */
-
-
     private static int copy(InputStream input, OutputStream output) throws IOException {
         long count = copyLarge(input, output);
         return count > 2147483647L ? -1 : (int)count;

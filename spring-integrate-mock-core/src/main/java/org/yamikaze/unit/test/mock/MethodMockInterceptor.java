@@ -50,7 +50,8 @@ public class MethodMockInterceptor implements MethodInterceptor {
     }
 
     private boolean isProfiler(MethodInvokeTime mit) {
-        return !mit.getDeclaringClass().getName().contains("AbstractConfig")
+        return Profilers.enabled()
+                && !mit.getDeclaringClass().getName().contains("AbstractConfig")
                 && !mit.getDeclaringClass().getName().contains("ServiceBean");
     }
 
@@ -186,7 +187,6 @@ public class MethodMockInterceptor implements MethodInterceptor {
     }
 
     private void recordAndLog(MethodInvokeTime mit, long escape, Object proceedResult) {
-        String className = mit.getDeclaringClass().getSimpleName();
         String methodName = mit.getMethod().getName();
 
         //factoryBean就不打日志了
@@ -198,19 +198,6 @@ public class MethodMockInterceptor implements MethodInterceptor {
             LOGGER.info("[REAL-RESULT] escape = {}, class = {}#{}", escape, mit.getDeclaringClass().getName(), methodName);
             LOGGER.info("[REAL-RESULT] \t value = {}", JsonObjectMapperProxy.encode(proceedResult));
         }
-
-        if (GlobalConfig.getEnableUsageLog()) {
-            logMockConfig(mit, className, proceedResult);
-        }
-    }
-
-    private void logMockConfig(MethodInvokeTime mit, String className, Object proceedResult) {
-        String methodName = mit.getMethod().getName();
-        String sb = "@Mock(clz = " + className +
-                ".class, method = \"" + methodName + "\",dataKey = \"mock-" + methodName + "\")";
-        LOGGER.info("if you need mock, please paste {}", sb);
-        LOGGER.info("[REAL-RESULT] \t DataCodeFactory.register(\"mock-{}\", OriginMockHolder.newInstance(\"{}\"))", methodName,  JsonObjectMapperProxy.encode(proceedResult));
-
     }
 
     static void clear() {

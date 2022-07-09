@@ -32,7 +32,7 @@ cd spring-integrate-mock && mvn install -DskipTests=true
 <dependency>
     <groupId>org.yamikaze</groupId>
     <artifactId>spring-integrate-junit4</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 
@@ -41,7 +41,7 @@ cd spring-integrate-mock && mvn install -DskipTests=true
 <dependency>
     <groupId>org.yamikaze</groupId>
     <artifactId>spring-integrate-junit5</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 
@@ -82,30 +82,42 @@ public class XXXTest {}
 
 ### 3.3、配置代理的bean列表（必须）
 经过上述配置之后，还需要配置需要代理那些bean，支持多维度的bean配置，我们需要在Spring容器初始化前配置，所以
-一般在junit4中的`@BeforeClass`或者junit5中的`@BeforeAll`注解修饰的方法中进行配置，默认情况下，自动代理DUBBO reference bean
+一般在junit4中的`@BeforeClass`或者junit5中的`@BeforeAll`注解修饰的方法中进行配置，默认情况下，自动代理DUBBO reference bean,但如果使用注解@Reference来引用Dubbo服务，则不会生效（因为未在Spring容器内产生bean定义）。
 ，以下为配置示例
 
-* Ant通配符形势的bean名称配置
+* 针对beanName的配置
 ```java
-GlobalConfig.addBeanNamePattern("*Adapter*");
+// 某些bean需要被代理
+GlobalConfig.proxy().includeBean("*Adapter*");
+// 某些bean不想被代理
+GlobalConfig.proxy().excludeBean("*Client*");
 ```
-* 不对DUBBO进行mock
+* 针对classType的mock配置
 ```java
-GlobalConfig.noMockDubbo();
-```
-* 某class需要进行配置
-```java
-GlobalConfig.addMockClass(UserService.class);
+// 需要对某个class进行mock代理
+GlobalConfig.proxy().includeType(UserService.class);
+// 需要对某些class的通配符进行代理
+GlobalConfig.proxy().includeType("com.xxx.xxx.xxx.*.**");
+
+// 不想要对某个class进行mock
+GlobalConfig.proxy().excludeType(UserService.class);
+// 不想要对一类class进行代理
+GlobalConfig.proxy().excludeType("com.xxx.xxx.xxx.*.**");
 ```
 
-* 某class必须使用jdk代理
+* 针对classType必须使用jdk代理
+默认情况下，会对Mybatis Mapper，Dubbo的ReferenceBean使用jdk代理
 ```java
-GlobalConfig.addMustJdkMock(UserService.class);
+GlobalConfig.proxy().includeJdkProxy(UserService.class);
+// 不想使用jdkProxy
+GlobalConfig.proxy().excludeJdkProxy(UserApi.class);
 ```
 
-* 以classname作为通配符进行匹配
+* 不进行mock代理
 ```java
-GlobalConfig.addMockPattern("com.xxx.xxx.xxx.*.**");
+GlobalConfig.proxy().disableProxy();
+// 不对dubbo进行代理
+GlobalConfig.proxy().disableDubboProxy();
 ```
 
 ### 3.4、其他配置
@@ -116,9 +128,21 @@ GlobalConfig.setMockEnabled(true);
 ```
 
 * 打印真实调用日志
-* 打印使用日志
+当发生真实调用时会打印此日志
+```java
+GlobalConfig.setEnableRealInvokeLog(true);
+```
+
 * 设置代理方式 cglib/java-native
+```java
+GlobalConfig.setUseCglibProxy(true/false);
+```
+
 * 启用/禁用agent
+在Junit4下，如果禁用agent，则会使用classloader进行字节码修改(classloader方式存在诸多问题，依赖于类加载器的传递性，需要额外配置才可能生效)，Junit5下禁用agent，则静态、私有方法mock会失效 
+```java
+GlobalConfig.setUseAgentProxy(true);
+```
 
 
 ## 4、使用示例

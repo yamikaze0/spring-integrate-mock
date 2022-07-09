@@ -1,9 +1,7 @@
 package org.yamikaze.unit.test.mock;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.yamikaze.unit.test.check.MethodDescriptor;
-import org.yamikaze.unit.test.handler.Handler;
+import org.yamikaze.unit.test.handler.HandlerSupport;
 import org.yamikaze.unit.test.mock.annotation.Mock;
 import org.yamikaze.unit.test.mock.annotation.Mocks;
 import org.yamikaze.unit.test.mock.answer.CodeAnswer;
@@ -21,15 +19,14 @@ import java.util.Map;
  * @version 1.0.0
  * @since 2019-04-09 15:04
  */
-public class MockHandler implements Handler {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MockHandler.class);
+public class MockHandler extends HandlerSupport {
 
     @Override
     public void before(MethodDescriptor descriptor) {
-        MethodMockInterceptor.clear();
         String message = descriptor.getClassName() + "#" + descriptor.getMethodName();
-        Profilers.startInvoke(message);
+        if (Profilers.enabled()) {
+            Profilers.startInvoke(message);
+        }
 
         Mock mock = descriptor.getAnnotation(Mock.class);
         Mocks mocks = descriptor.getAnnotation(Mocks.class);
@@ -47,8 +44,8 @@ public class MockHandler implements Handler {
 
         /*
          * Process special
-         * @Mock(clz = UserAdapter.class, method =  "getUserById" mockData = true, dataKey = "mock-getUserById01")
-         * @Mock(clz = UserAdapter.class, method =  "getUserById" mockData = true, dataKey = "mock-getUserById02")
+         * @Mock(clz = UserAdapter.class, method =  "getUserById", dataKey = "mock-getUserById01")
+         * @Mock(clz = UserAdapter.class, method =  "getUserById", dataKey = "mock-getUserById02")
          *
          * Result is:
          *
@@ -101,21 +98,15 @@ public class MockHandler implements Handler {
 
     @Override
     public void after(MethodDescriptor descriptor) {
-        Profilers.closed(false);
-        MethodMockInterceptor.clear();
-    }
-
-
-    @Override
-    public void throwEx(MethodDescriptor descriptor, Throwable throwable) {
-
+        if (Profilers.enabled()) {
+            Profilers.closed(false);
+        }
     }
 
     private MockConfig parseConfig(Mock mock) {
         MockConfig config = new MockConfig();
         config.setDataKey(mock.key());
         config.setMockClass(mock.clz());
-        config.setMockData(mock.mockData());
         config.setMockMethodPattern(mock.method());
         return config;
     }
@@ -130,15 +121,5 @@ public class MockHandler implements Handler {
         }
 
         return mockConfigs;
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return (obj) instanceof MockHandler;
     }
 }

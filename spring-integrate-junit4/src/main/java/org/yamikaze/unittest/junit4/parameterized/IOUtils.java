@@ -8,6 +8,7 @@ import java.io.IOException;
  * @version 1.0.0
  * @date 2020-08-17 14:41
  */
+@SuppressWarnings("AlibabaClassNamingShouldBeCamel")
 final class IOUtils {
 
     public static void close(Closeable closeable) {

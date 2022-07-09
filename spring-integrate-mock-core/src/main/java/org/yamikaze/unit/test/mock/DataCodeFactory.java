@@ -30,7 +30,6 @@ public class DataCodeFactory {
         }
 
         //data can null
-
         DATA_MAP.put(code, e);
     }
 

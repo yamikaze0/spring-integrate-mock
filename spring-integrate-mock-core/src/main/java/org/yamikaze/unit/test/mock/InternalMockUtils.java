@@ -1,5 +1,6 @@
 package org.yamikaze.unit.test.mock;
 
+import org.yamikaze.unit.test.enhance.ModifiedClassHolder;
 import org.yamikaze.unit.test.mock.answer.Answer;
 import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
 import org.yamikaze.unit.test.tree.Profilers;
@@ -51,8 +52,12 @@ public class InternalMockUtils {
         if (answer == null) {
             return NO_MOCK;
         }
-        Profilers.startInvoke(className.replace("/", ".") + "#" + methodName);
-        Profilers.closed(true);
+
+        if (Profilers.enabled()) {
+            Profilers.startInvoke(className.replace("/", ".") + "#" + methodName);
+            Profilers.closed(true);
+        }
+
         Object mockResult = answer.answer(mi);
         LOGGER.info("internal mockito mock. key = {}#{}", className, methodName);
         if (mockResult instanceof Throwable) {

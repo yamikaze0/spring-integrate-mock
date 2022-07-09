@@ -7,16 +7,15 @@ import org.junit.runners.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.yamikaze.unit.test.enhance.ClassEnhanceDispatcher;
+import org.yamikaze.unit.test.enhance.EnhancerProxy;
 import org.yamikaze.unit.test.enhance.ModifyConfig;
-import org.yamikaze.unit.test.mock.AgentProxy;
+import org.yamikaze.unit.test.enhance.AgentProxy;
 import org.yamikaze.unit.test.mock.ClassUtils;
 import org.yamikaze.unit.test.mock.Constants;
-import org.yamikaze.unit.test.mock.EnhancerProxy;
 import org.yamikaze.unit.test.mock.GlobalConfig;
-import org.yamikaze.unit.test.mock.ModifiedClassHolder;
-import org.yamikaze.unit.test.mock.annotation.MockEnhance;
 import org.yamikaze.unit.test.mock.MockRunnerHelper;
+import org.yamikaze.unit.test.enhance.ModifiedClassHolder;
+import org.yamikaze.unit.test.mock.annotation.MockEnhance;
 
 import java.lang.annotation.Annotation;
 import java.lang.instrument.UnmodifiableClassException;
@@ -44,8 +43,6 @@ public class SpringJunitMockRunner extends SpringJUnit4ClassRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringJunitMockRunner.class);
 
     static final MockClassLoader LOADER = new MockClassLoader(Thread.currentThread().getContextClassLoader());
-
-    private static final ClassEnhanceDispatcher DISPATCHER = new ClassEnhanceDispatcher();
 
     public SpringJunitMockRunner(Class<?> clazz) throws InitializationError {
         super(LOADER.replaceClass(clazz));
@@ -183,8 +180,8 @@ public class SpringJunitMockRunner extends SpringJUnit4ClassRunner {
                 className = name.substring(0, name.indexOf(Constants.INTERNAL_CLASS_SYMBOL));
             }
 
-            byte[] enhancedBytes = DISPATCHER.enhance(targetClass, MODIFIED_MAP.get(className));
-            if (enhancedBytes == ClassEnhanceDispatcher.ENHANCE_ERR) {
+            byte[] enhancedBytes = EnhancerProxy.enhance(targetClass, MODIFIED_MAP.get(className));
+            if (enhancedBytes == EnhancerProxy.ENHANCE_ERR) {
                 return targetClass;
             }
 

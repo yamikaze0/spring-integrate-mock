@@ -13,11 +13,11 @@ import org.yamikaze.unit.test.check.MethodDescriptor;
 import org.yamikaze.unit.test.degrade.DegradeUtils;
 import org.yamikaze.unit.test.handler.Handler;
 import org.yamikaze.unit.test.handler.ThrowExceptionHandler;
-import org.yamikaze.unit.test.mock.AgentProxy;
-import org.yamikaze.unit.test.mock.EnhancerProxy;
+import org.yamikaze.unit.test.enhance.AgentProxy;
+import org.yamikaze.unit.test.enhance.EnhancerProxy;
 import org.yamikaze.unit.test.mock.GlobalConfig;
+import org.yamikaze.unit.test.mock.MockContextUtils;
 import org.yamikaze.unit.test.mock.MockRunnerHelper;
-import org.yamikaze.unit.test.mock.RecordBehaviorList;
 import org.yamikaze.unit.test.mock.annotation.MockEnhance;
 import org.yamikaze.unit.test.mock.event.Event;
 import org.yamikaze.unit.test.mock.event.EventListener;
@@ -101,9 +101,11 @@ public class Junit5MethodEachCallback implements BeforeAllCallback, AfterAllCall
         descriptor.setMethod(extensionContext.getRequiredTestMethod());
         descriptor.setMethodName(extensionContext.getRequiredTestMethod().getName());
 
+        // prepare context
+        MockContextUtils.prepare();
+
         touchChecker(descriptor);
         preHandler(descriptor);
-
     }
 
     @Override
@@ -121,7 +123,9 @@ public class Junit5MethodEachCallback implements BeforeAllCallback, AfterAllCall
         });
 
         afterHandler(descriptor);
-        RecordBehaviorList.INSTANCE.clear();
+
+        // clear context
+        MockContextUtils.clear();
     }
 
     @Override
