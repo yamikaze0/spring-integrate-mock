@@ -5,7 +5,7 @@
 
     <groupId>org.yamikaze</groupId>
     <artifactId>spring-integrate-mock</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
 
@@ -63,6 +63,19 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>thirdparty</id>
+            <name>thirdparty for meetyou</name>
+            <url>https://nexus.youzibuy.com/nexus/content/repositories/thirdparty/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshotMeetYou</id>
+            <name>snapshot for meetyou</name>
+            <url>https://nexus.youzibuy.com/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 
     <build>

@@ -5,10 +5,10 @@
     <parent>
         <artifactId>spring-integrate-mock</artifactId>
         <groupId>org.yamikaze</groupId>
-        <version>1.0.1</version>
+        <version>1.0.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 
     <artifactId>spring-integrate-junit5</artifactId>
 
