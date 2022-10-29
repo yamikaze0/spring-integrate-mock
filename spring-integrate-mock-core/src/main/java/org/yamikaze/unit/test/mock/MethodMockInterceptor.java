@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author qinluo
@@ -32,7 +33,7 @@ public class MethodMockInterceptor implements MethodInterceptor {
     /**
      * Current Test method info.
      */
-    private static final Map<Method, MethodInvokeTime> METHOD_KEY = new HashMap<>(16);
+    private static final Map<Method, MethodInvokeTime> METHOD_KEY = new ConcurrentHashMap<>(16);
 
     /**
      * NO_MOCK object.
@@ -67,6 +68,14 @@ public class MethodMockInterceptor implements MethodInterceptor {
             methodInvokeTime = generateMethodInvokeTime(invocation);
             METHOD_KEY.put(method, methodInvokeTime);
         }
+
+        Class<?> targetClazz = ClassUtils.extractClosedUnProxyClass(invocation);
+        // Ensure target class is subclass of actual class.
+        if (targetClazz == null || !methodInvokeTime.getDeclaringClass().isAssignableFrom(targetClazz)) {
+            targetClazz = methodInvokeTime.getDeclaringClass();
+        }
+        // thread-unsafe
+        methodInvokeTime.setTargetClass(targetClazz);
 
         if (isProfiler(methodInvokeTime)) {
             Profilers.startInvoke(methodInvokeTime.getSimpleKey());
@@ -147,7 +156,14 @@ public class MethodMockInterceptor implements MethodInterceptor {
             actualClazz = invocation.getThis().getClass();
         }
 
+        Class<?> targetClazz = ClassUtils.extractClosedUnProxyClass(invocation);
+        // Ensure target class is subclass of actual class.
+        if (targetClazz == null || !actualClazz.isAssignableFrom(targetClazz)) {
+            targetClazz = actualClazz;
+        }
+
         mit.setDeclaringClass(actualClazz);
+        mit.setTargetClass(targetClazz);
         mit.setMethod(ClassUtils.findMethod(declaringClazz, method.getName(), method.getParameterTypes()));
         return mit;
     }
@@ -156,7 +172,7 @@ public class MethodMockInterceptor implements MethodInterceptor {
         InvocationMethod mi = new InvocationMethod();
         mi.setProxy(invocation.getThis());
         mi.setMethod(invocation.getMethod());
-        mi.setTargetClass(mit.getDeclaringClass());
+        mi.setTargetClass(mit.getTargetClass());
         mi.setDeclaringClass(mit.getDeclaringClass());
         mi.setArgs(invocation.getArguments());
         mi.setBeanName(tryGetBeanName(invocation));

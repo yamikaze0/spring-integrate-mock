@@ -18,7 +18,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>5.3.20</spring.version>
+        <spring.version>5.3.23</spring.version>
     </properties>
 
     <dependencyManagement>
@@ -63,21 +63,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <distributionManagement>
-        <repository>
-            <id>thirdparty</id>
-            <name>thirdparty for meetyou</name>
-            <url>https://nexus.youzibuy.com/nexus/content/repositories/thirdparty/</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshotMeetYou</id>
-            <name>snapshot for meetyou</name>
-            <url>https://nexus.youzibuy.com/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-
+    
     <build>
         <plugins>
             <!-- compiler插件, 设定JDK版本 -->

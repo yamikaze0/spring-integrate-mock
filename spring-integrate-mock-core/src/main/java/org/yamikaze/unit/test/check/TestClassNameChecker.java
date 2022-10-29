@@ -13,6 +13,10 @@ public class TestClassNameChecker implements Checker {
 
     @Override
     public void check(MethodDescriptor descriptor) {
+        if (!ENABLED) {
+            return;
+        }
+
         String className = descriptor.getType().getName();
 
         //description.getClassName得到的是full name

@@ -81,7 +81,7 @@ public class MockHandler extends HandlerSupport {
                 candidateMethods.forEach(method -> {
                     RecordBehavior recordBehavior = methodRecordBehaviorMap.get(method);
                     if (recordBehavior == null) {
-                        recordBehavior = new AccurateRecordBehavior();
+                        recordBehavior = new RecordBehavior();
                         methodRecordBehaviorMap.put(method, recordBehavior);
                         recordBehavior.setClz(p.getMockClass());
                         recordBehavior.setMethod(method);

@@ -7,8 +7,9 @@
         <groupId>org.yamikaze</groupId>
         <version>1.0.3</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
-    <version>1.0.3</version>
+    <version>1.0.5-SNAPSHOT</version>
 
     <artifactId>spring-integrate-junit4</artifactId>
 
@@ -27,7 +28,7 @@
         <dependency>
             <groupId>org.yamikaze</groupId>
             <artifactId>spring-integrate-mock-core</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.5-SNAPSHOT</version>
         </dependency>
 
         <dependency>

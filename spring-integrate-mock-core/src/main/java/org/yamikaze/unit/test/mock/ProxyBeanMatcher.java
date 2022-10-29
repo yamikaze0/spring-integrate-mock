@@ -8,7 +8,9 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.ReflectionUtils;
 import org.yamikaze.unit.test.mock.config.ProxyConfig;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -70,6 +72,7 @@ class ProxyBeanMatcher {
             BeanDefinition beanDefinition = registry.getBeanDefinition(beanName);
             String beanClassName = getResolvedType(beanDefinition);
             String factoryClass = beanDefinition.getFactoryBeanName();
+            Class<?> resolved = resolve(beanClassName);
 
             // 需要忽略代理的bean
             if (matchPattern(ignoreClassPatterns, beanClassName)
@@ -93,6 +96,10 @@ class ProxyBeanMatcher {
                 continue;
             }
 
+            if (filter(resolved)) {
+                continue;
+            }
+
             //Must use jdk proxy.
             if (matchPattern(conf.getForceJdkProxyWhitelist(), beanClassName)) {
                 jdkProxyBeans.remove(beanName);
@@ -108,6 +115,26 @@ class ProxyBeanMatcher {
 
     }
 
+    private boolean filter(Class<?> type) {
+        // Unknown class.
+        if (type == null) {
+            return false;
+        }
+
+        // Final class, eg、 public final class XXXUtils {}
+        if (Modifier.isFinal(type.getModifiers()) && !type.isInterface()) {
+            return true;
+        }
+
+        // Normal class, but has no visible constructors.
+        if (!Modifier.isFinal(type.getModifiers()) && !type.isInterface()) {
+            Constructor<?>[] constructors = type.getConstructors();
+            return constructors.length == 0;
+        }
+
+        return false;
+    }
+
     private boolean matchPattern(List<String> patterns, String checkPattern) {
         if (checkPattern == null) {
             return false;
@@ -120,6 +147,18 @@ class ProxyBeanMatcher {
         }
 
         return false;
+    }
+
+    private Class<?> resolve(String classname) {
+        if (classname == null || classname.trim().length() == 0) {
+            return null;
+        }
+
+        try {
+            return Class.forName(classname, false, this.getClass().getClassLoader());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private String getResolvedType(BeanDefinition definition) {

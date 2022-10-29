@@ -19,6 +19,8 @@ public class MethodInvokeTime {
      * 声明这个方法的类，最低层级
      */
     private Class<?> declaringClass;
+    private Class<?> targetClass;
+
 
     /**
      * Origin method.
@@ -54,32 +56,38 @@ public class MethodInvokeTime {
 
     public MethodInvokeTime copyOf() {
         MethodInvokeTime mit = new MethodInvokeTime();
-        mit.setDeclaringClass(declaringClass);
-        mit.setMethod(method);
+        mit.declaringClass = this.declaringClass;
+        mit.method = this.method;
+        mit.currentInvocation = this.currentInvocation;
+        mit.targetClass = this.targetClass;
         mit.realInvokeTimes.addAndGet(this.realInvokeTimes.get());
         mit.mockTimes.addAndGet(this.mockTimes.get());
         mit.invokeSequences.addAll(this.invokeSequences);
-        mit.currentInvocation = this.currentInvocation;
-
         return mit;
     }
 
     public String getKey() {
-        return declaringClass.getSimpleName()
-                + "#" + method.getName() + ClassUtils.appendClasses(method.getParameterTypes(), true);
+        return targetClass.getSimpleName() + "#" + method.getName() + ClassUtils.appendClasses(method.getParameterTypes(), true);
     }
 
     public String getSimpleKey() {
-        return declaringClass.getSimpleName()
-                + "#" + method.getName();
+        return targetClass.getSimpleName() + "#" + method.getName();
     }
 
     public Class<?> getDeclaringClass() {
         return declaringClass;
     }
 
+    public Class<?> getTargetClass() {
+        return targetClass;
+    }
+
     public void setDeclaringClass(Class<?> declaringClass) {
         this.declaringClass = declaringClass;
+    }
+
+    public void setTargetClass(Class<?> targetClass) {
+        this.targetClass = targetClass;
     }
 
     public void realInvoke() {
