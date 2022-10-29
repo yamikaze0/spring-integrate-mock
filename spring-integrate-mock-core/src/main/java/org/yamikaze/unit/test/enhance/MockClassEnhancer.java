@@ -197,10 +197,7 @@ public class MockClassEnhancer implements ClassEnhancer {
                 //非Object返回值需要强转
                 if (!JAVA_LANG_OBJECT.equals(returnType.getClassName()))  {
                     String internalName = returnType.getInternalName();
-                    boolean isArray = false;
-                    if (internalName.startsWith(ARRAY_DIMENSION_CHAR)) {
-                        isArray = true;
-                    }
+                    boolean isArray = internalName.startsWith(ARRAY_DIMENSION_CHAR);
 
                     BoxingTypeWrapper boxingType = getBoxingTypeWrapper(returnType.getClassName());
 

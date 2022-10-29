@@ -19,6 +19,11 @@ public interface Checker {
 
     String CLASS_TEST_PREFIX = "Test";
 
+    /**
+     * Checker enabled.
+     */
+    boolean ENABLED = Boolean.getBoolean("test.check.enabled");
+
 
     /**
      * 检查，主要强制规范检查单测命名

@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamikaze.unit.test.mock.Constants;
 import org.yamikaze.unit.test.mock.GlobalConfig;
+import org.yamikaze.unit.test.spi.EntryPoints;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,6 +24,8 @@ import java.util.stream.Collectors;
 public class EnhancerProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancerProxy.class);
+    public static final int BEFORE_ENHANCE = 1;
+    public static final int AFTER_ENHANCE = 2;
 
     /**
      * Enhance class occurred error.
@@ -59,6 +62,7 @@ public class EnhancerProxy {
 
                 if (ec.contains(clzName.replace(Constants.JVM_CLASS_SEPARATOR, Constants.CLASS_SEPARATOR))) {
                     LOGGER.info("enhance class {}", classBeingRedefined.getName());
+                    EntryPoints.execute(BEFORE_ENHANCE, new Object[] {className, classfileBuffer});
                     byte[] newClassFileBuffer = new MockClassEnhancer(classfileBuffer).enhanceClass();
                     Class<?> prev = null;
                     if (newClassFileBuffer != null) {
@@ -67,6 +71,7 @@ public class EnhancerProxy {
 
                     // prev != null means classBeingRedefined has enhanced in other thread.
                     if (prev == null) {
+                        EntryPoints.execute(AFTER_ENHANCE, new Object[] {className, newClassFileBuffer});
                         return newClassFileBuffer;
                     }
                 }

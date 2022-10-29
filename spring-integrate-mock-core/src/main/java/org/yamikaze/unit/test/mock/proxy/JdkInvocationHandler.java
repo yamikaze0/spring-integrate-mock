@@ -18,7 +18,7 @@ public class JdkInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        InvocationMethod invocation = new InvocationMethod();
+        MockInvocation invocation = new MockInvocation();
         invocation.setArgs(args);
         invocation.setMethod(method);
         invocation.setProxy(proxy);
@@ -38,7 +38,7 @@ public class JdkInvocationHandler implements InvocationHandler {
         return recordAndAnswer(method, args, invocation, answer, recordBehavior);
     }
 
-    public static Object recordAndAnswer(Method method, Object[] args, InvocationMethod invocation, Answer answer, RecordBehavior recordBehavior) {
+    public static Object recordAndAnswer(Method method, Object[] args, MockInvocation invocation, Answer answer, RecordBehavior recordBehavior) {
         int index = 0;
         if (args != null && args.length > 0) {
             for (Object arg : args) {

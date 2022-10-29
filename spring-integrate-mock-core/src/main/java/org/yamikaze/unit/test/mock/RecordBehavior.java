@@ -2,7 +2,7 @@ package org.yamikaze.unit.test.mock;
 
 import org.yamikaze.unit.test.mock.answer.Answer;
 import org.yamikaze.unit.test.mock.argument.ArgumentMatcher;
-import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
+import org.yamikaze.unit.test.mock.proxy.MockInvocation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -42,6 +42,9 @@ public class RecordBehavior {
      */
     private boolean matchBeanName;
 
+    private int stock;
+    private final List<Answer> answers = new ArrayList<>();
+
     public String getBeanName() {
         return beanName;
     }
@@ -74,17 +77,12 @@ public class RecordBehavior {
         this.matchParams = matchParams;
     }
 
-    private List<Answer> answers = new ArrayList<>();
-
     public synchronized Answer getAnswer() {
         if (answers.isEmpty()) {
             return null;
         }
 
-        if (answers.size() == 1) {
-            return answers.get(0);
-        }
-
+        this.stock--;
         return answers.remove(0);
     }
 
@@ -110,12 +108,17 @@ public class RecordBehavior {
 
     public void addAnswer(Answer answer) {
         this.answers.add(answer);
+        this.stock = this.answers.size();
     }
 
     /**
      * cs:off
      */
-    public boolean match(InvocationMethod invocation) {
+    public boolean match(MockInvocation invocation) {
+        if (stock <= 0) {
+            return false;
+        }
+
         //不处理static mock的场景
         if (invocation.getStaticInvoke()) {
             return false;

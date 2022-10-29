@@ -1,6 +1,6 @@
 package org.yamikaze.unit.test.mock;
 
-import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
+import org.yamikaze.unit.test.mock.proxy.MockInvocation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,7 +61,7 @@ public class RecordBehaviorList {
         return currentRecordBehavior;
     }
 
-    public RecordBehavior findRecordBehavior(InvocationMethod invocation) {
+    public RecordBehavior findRecordBehavior(MockInvocation invocation) {
         RecordBehavior behavior;
         RecordBehavior nearestBehavior = null;
 

@@ -1,6 +1,6 @@
 package org.yamikaze.unit.test.mock.answer;
 
-import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
+import org.yamikaze.unit.test.mock.proxy.MockInvocation;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -37,7 +37,7 @@ public class DefaultValueAnswer extends AbstractAnswer {
     }
 
     @Override
-    public Object answer(InvocationMethod invocation) {
+    public Object answer(MockInvocation invocation) {
         this.accessed = true;
 
         Method method = invocation.getMethod();

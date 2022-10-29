@@ -13,6 +13,10 @@ public class MethodNameChecker implements Checker {
 
     @Override
     public void check(MethodDescriptor description) {
+        if (!ENABLED) {
+            return;
+        }
+
         String methodName = description.getMethodName();
         if (!methodName.startsWith(METHOD_TEST_PREFIX)) {
             throw new IllegalStateException("test method name must start with test, but actually is " + methodName);

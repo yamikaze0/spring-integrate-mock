@@ -9,7 +9,7 @@ import org.yamikaze.unit.test.handler.HandlerSupport;
 import org.yamikaze.unit.test.mock.answer.AbstractAnswer;
 import org.yamikaze.unit.test.mock.answer.Answer;
 import org.yamikaze.unit.test.mock.argument.ArgumentMatcher;
-import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
+import org.yamikaze.unit.test.mock.proxy.MockInvocation;
 import org.yamikaze.unit.test.spi.JsonObjectMapperProxy;
 
 import java.io.ByteArrayOutputStream;
@@ -339,7 +339,7 @@ public class MockRecordHandler extends HandlerSupport {
         }
 
         @Override
-        public Object answer(InvocationMethod invocation) {
+        public Object answer(MockInvocation invocation) {
             return this.answer.answer(invocation);
         }
 

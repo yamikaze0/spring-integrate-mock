@@ -5,7 +5,7 @@
 
     <groupId>org.yamikaze</groupId>
     <artifactId>spring-integrate-mock</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
 
@@ -18,7 +18,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>5.3.20</spring.version>
+        <spring.version>5.3.23</spring.version>
     </properties>
 
     <dependencyManagement>
@@ -63,8 +63,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-
+    
     <build>
         <plugins>
             <!-- compiler插件, 设定JDK版本 -->

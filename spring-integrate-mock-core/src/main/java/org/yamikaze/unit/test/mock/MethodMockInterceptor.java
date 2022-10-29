@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.yamikaze.unit.test.method.MethodUtils;
 import org.yamikaze.unit.test.mock.answer.Answer;
-import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
+import org.yamikaze.unit.test.mock.proxy.MockInvocation;
 import org.yamikaze.unit.test.spi.ExtensionFactory;
 import org.yamikaze.unit.test.spi.JsonObjectMapperProxy;
 import org.yamikaze.unit.test.tree.Profilers;
@@ -15,9 +15,9 @@ import org.yamikaze.unit.test.tree.Profilers;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author qinluo
@@ -32,7 +32,7 @@ public class MethodMockInterceptor implements MethodInterceptor {
     /**
      * Current Test method info.
      */
-    private static final Map<Method, MethodInvokeTime> METHOD_KEY = new HashMap<>(16);
+    private static final Map<Method, InternalMethodInvocation> INVOCATIONS = new ConcurrentHashMap<>(16);
 
     /**
      * NO_MOCK object.
@@ -49,7 +49,7 @@ public class MethodMockInterceptor implements MethodInterceptor {
         PROCESSORS.addAll(processors);
     }
 
-    private boolean isProfiler(MethodInvokeTime mit) {
+    private boolean isProfiler(InternalMethodInvocation mit) {
         return Profilers.enabled()
                 && !mit.getDeclaringClass().getName().contains("AbstractConfig")
                 && !mit.getDeclaringClass().getName().contains("ServiceBean");
@@ -62,34 +62,42 @@ public class MethodMockInterceptor implements MethodInterceptor {
             return invocation.proceed();
         }
 
-        MethodInvokeTime methodInvokeTime = METHOD_KEY.get(method);
-        if (methodInvokeTime == null) {
-            methodInvokeTime = generateMethodInvokeTime(invocation);
-            METHOD_KEY.put(method, methodInvokeTime);
+        InternalMethodInvocation internalInvocation = INVOCATIONS.get(method);
+        if (internalInvocation == null) {
+            internalInvocation = createInvocation(invocation);
+            INVOCATIONS.put(method, internalInvocation);
         }
 
-        if (isProfiler(methodInvokeTime)) {
-            Profilers.startInvoke(methodInvokeTime.getSimpleKey());
+        Class<?> targetClazz = ClassUtils.extractClosedUnProxyClass(invocation);
+        // Ensure target class is subclass of actual class.
+        if (targetClazz == null || !internalInvocation.getDeclaringClass().isAssignableFrom(targetClazz)) {
+            targetClazz = internalInvocation.getDeclaringClass();
+        }
+        // thread-safe
+        internalInvocation.setTarget(targetClazz);
+
+        if (isProfiler(internalInvocation)) {
+            Profilers.startInvoke(internalInvocation.getSimpleKey());
         }
 
-        Object answerResult = findAnswerResult(invocation, methodInvokeTime);
+        Object answerResult = findAnswerResult(invocation, internalInvocation);
         if (answerResult != NO_MOCK) {
-            LOGGER.info("mockito mock. key = {}", methodInvokeTime.getKey());
-            methodInvokeTime.mockInvoke();
+            LOGGER.info("mockito mock. key = {}", internalInvocation.getKey());
+            internalInvocation.mockInvoked();
             if (answerResult instanceof Throwable) {
-                if (isProfiler(methodInvokeTime)) {
+                if (isProfiler(internalInvocation)) {
                     Profilers.closed(true);
                 }
                 throw (Throwable)answerResult;
             }
 
             if (answerResult instanceof OriginMockHolder) {
-                Method pmethod = methodInvokeTime.getMethod();
+                Method pmethod = internalInvocation.getMethod();
                 OriginMockHolder holder = (OriginMockHolder) answerResult;
                 answerResult = JsonObjectMapperProxy.decode(holder.getJson(), pmethod.getGenericReturnType());
             }
 
-            if (isProfiler(methodInvokeTime)) {
+            if (isProfiler(internalInvocation)) {
                 Profilers.closed(true);
             }
 
@@ -103,39 +111,39 @@ public class MethodMockInterceptor implements MethodInterceptor {
         try {
             proceed = invocation.proceed();
         } catch (Throwable e) {
-            if (isProfiler(methodInvokeTime)) {
+            if (isProfiler(internalInvocation)) {
                 Profilers.closedWithException(false, true);
             }
             throw e;
         }
 
         long end = System.currentTimeMillis();
-        methodInvokeTime.realInvoke();
+        internalInvocation.realInvoked();
 
-        if (isProfiler(methodInvokeTime)) {
+        if (isProfiler(internalInvocation)) {
             Profilers.closed(false);
         }
 
-        afterPostpositionProcess(methodInvokeTime, proceed, invocation.getArguments());
+        afterPostpositionProcess(internalInvocation, proceed, invocation.getArguments());
 
-        recordAndLog(methodInvokeTime, (end - start), proceed);
+        recordAndLog(internalInvocation, (end - start), proceed);
 
         return proceed;
     }
 
-    private void afterPostpositionProcess(MethodInvokeTime methodInvokeTime, Object proceed, Object ...args) {
+    private void afterPostpositionProcess(InternalMethodInvocation methodInvokeTime, Object proceed, Object ...args) {
         if (PROCESSORS.isEmpty()) {
             return;
         }
 
-        MethodInvokeTime mit = methodInvokeTime.copyOf();
+        InternalMethodInvocation mit = methodInvokeTime.copyOf();
         for (PostpositionProcessor processor : PROCESSORS) {
             processor.afterRealInvokeProcess(mit, proceed, args);
         }
     }
 
-    private MethodInvokeTime generateMethodInvokeTime(MethodInvocation invocation) {
-        MethodInvokeTime mit = new MethodInvokeTime();
+    private InternalMethodInvocation createInvocation(MethodInvocation invocation) {
+        InternalMethodInvocation mit = new InternalMethodInvocation();
         Method method = invocation.getMethod();
 
         Class<?> declaringClazz = ClassUtils.extractClosedDeclaringClass(method.getDeclaringClass(), method);
@@ -152,16 +160,14 @@ public class MethodMockInterceptor implements MethodInterceptor {
         return mit;
     }
 
-    private Object findAnswerResult(MethodInvocation invocation, MethodInvokeTime mit) {
-        InvocationMethod mi = new InvocationMethod();
+    private Object findAnswerResult(MethodInvocation invocation, InternalMethodInvocation mit) {
+        MockInvocation mi = new MockInvocation();
         mi.setProxy(invocation.getThis());
         mi.setMethod(invocation.getMethod());
-        mi.setTargetClass(mit.getDeclaringClass());
+        mi.setTargetClass(mit.getTarget());
         mi.setDeclaringClass(mit.getDeclaringClass());
         mi.setArgs(invocation.getArguments());
         mi.setBeanName(tryGetBeanName(invocation));
-
-        mit.setCurrentInvocation(mi);
 
         RecordBehavior recordBehavior = RecordBehaviorList.INSTANCE.findRecordBehavior(mi);
         if (recordBehavior == null) {
@@ -183,10 +189,9 @@ public class MethodMockInterceptor implements MethodInterceptor {
         }
 
         return null;
-
     }
 
-    private void recordAndLog(MethodInvokeTime mit, long escape, Object proceedResult) {
+    private void recordAndLog(InternalMethodInvocation mit, long escape, Object proceedResult) {
         String methodName = mit.getMethod().getName();
 
         //factoryBean就不打日志了
@@ -195,13 +200,13 @@ public class MethodMockInterceptor implements MethodInterceptor {
         }
 
         if (GlobalConfig.getEnableRealInvokeLog()) {
-            LOGGER.info("[REAL-RESULT] escape = {}, class = {}#{}", escape, mit.getDeclaringClass().getName(), methodName);
+            LOGGER.info("[REAL-RESULT] escape = {}, class = {}#{}", escape, mit.getTarget().getName(), methodName);
             LOGGER.info("[REAL-RESULT] \t value = {}", JsonObjectMapperProxy.encode(proceedResult));
         }
     }
 
     static void clear() {
-        METHOD_KEY.clear();
+        INVOCATIONS.clear();
         Profilers.dump();
         Profilers.clear();
     }

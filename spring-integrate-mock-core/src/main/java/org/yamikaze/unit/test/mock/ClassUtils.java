@@ -1,5 +1,6 @@
 package org.yamikaze.unit.test.mock;
 
+import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.util.AntPathMatcher;
 
 import java.lang.reflect.Method;
@@ -161,6 +162,32 @@ public class ClassUtils {
 
         return candidateClass;
 
+    }
+
+    public static Class<?> extractClosedUnProxyClass(MethodInvocation invocation) {
+        Object target = invocation.getThis();
+        if (target == null) {
+            return null;
+        }
+
+        Class<?> originType = target.getClass();
+        Class<?> targetType = originType;
+        while (targetType != Object.class) {
+            if (isProxyClass(targetType)) {
+                targetType = targetType.getSuperclass();
+                continue;
+            }
+            break;
+        }
+
+        if (targetType == Object.class) {
+            Class<?>[] interfaces = originType.getInterfaces();
+            if (interfaces.length > 0) {
+                return interfaces[0];
+            }
+        }
+
+        return targetType;
     }
 
     private static boolean isProxyClass(Class<?> clz) {
