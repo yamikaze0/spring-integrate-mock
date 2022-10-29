@@ -1,6 +1,6 @@
 package org.yamikaze.unit.test.mock.answer;
 
-import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
+import org.yamikaze.unit.test.mock.proxy.MockInvocation;
 
 /**
  * @author qinluo
@@ -10,7 +10,7 @@ import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
 public class NoopAnswer extends AbstractAnswer {
 
     @Override
-    public Object answer(InvocationMethod invocation) {
+    public Object answer(MockInvocation invocation) {
         accessed = true;
         return null;
     }

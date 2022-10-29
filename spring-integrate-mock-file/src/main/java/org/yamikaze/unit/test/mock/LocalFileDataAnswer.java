@@ -4,7 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yamikaze.unit.test.mock.answer.AbstractAnswer;
-import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
+import org.yamikaze.unit.test.mock.proxy.MockInvocation;
 import org.yamikaze.unit.test.spi.JsonObjectMapperProxy;
 
 import java.io.File;
@@ -59,7 +59,7 @@ public class LocalFileDataAnswer extends AbstractAnswer {
     }
 
     @Override
-    public Object answer(InvocationMethod invocation) {
+    public Object answer(MockInvocation invocation) {
         if (mockData != null) {
             accessed = true;
             return new OriginMockHolder(mockData.getResult());

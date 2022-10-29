@@ -19,7 +19,7 @@ public class CglibMethodInterceptor implements MethodInterceptor {
 
     @Override
     public Object intercept(Object o, Method method, Object[] args, MethodProxy methodProxy) {
-        InvocationMethod invocation = new InvocationMethod();
+        MockInvocation invocation = new MockInvocation();
         invocation.setArgs(args);
         invocation.setMethod(method);
         invocation.setProxy(o);

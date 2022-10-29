@@ -7,18 +7,31 @@ import java.lang.reflect.Method;
  * @version 1.0.0
  * @date 2019-11-11 18:48
  */
-public class InvocationMethod {
+public class MockInvocation {
 
+    /**
+     * Target method.
+     */
     private Method method;
 
+    /**
+     * The class with declared target method.
+     */
     private Class<?> declaringClass;
 
+    /**
+     * Proxy Object.
+     */
     private Object proxy;
 
-    private Object target;
-
+    /**
+     * Current invocation arguments.
+     */
     private Object[] args;
 
+    /**
+     * The actual type of target.
+     */
     private Class<?> targetClass;
 
     /**
@@ -86,13 +99,5 @@ public class InvocationMethod {
 
     public Object getProxy() {
         return proxy;
-    }
-
-    public Object getTarget() {
-        return target;
-    }
-
-    public void setTarget(Object target) {
-        this.target = target;
     }
 }

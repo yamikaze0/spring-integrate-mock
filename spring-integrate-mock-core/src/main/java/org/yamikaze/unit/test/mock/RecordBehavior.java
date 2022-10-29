@@ -2,7 +2,7 @@ package org.yamikaze.unit.test.mock;
 
 import org.yamikaze.unit.test.mock.answer.Answer;
 import org.yamikaze.unit.test.mock.argument.ArgumentMatcher;
-import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
+import org.yamikaze.unit.test.mock.proxy.MockInvocation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -114,7 +114,7 @@ public class RecordBehavior {
     /**
      * cs:off
      */
-    public boolean match(InvocationMethod invocation) {
+    public boolean match(MockInvocation invocation) {
         if (stock <= 0) {
             return false;
         }

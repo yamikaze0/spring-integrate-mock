@@ -1,7 +1,7 @@
 package org.yamikaze.unit.test.mock.answer;
 
 import org.yamikaze.unit.test.mock.DataCodeFactory;
-import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
+import org.yamikaze.unit.test.mock.proxy.MockInvocation;
 
 /**
  * @author qinluo
@@ -20,7 +20,7 @@ public class CodeAnswer extends AbstractAnswer {
     }
 
     @Override
-    public Object answer(InvocationMethod invocation) {
+    public Object answer(MockInvocation invocation) {
         this.accessed = true;
         return DataCodeFactory.getData(code);
     }

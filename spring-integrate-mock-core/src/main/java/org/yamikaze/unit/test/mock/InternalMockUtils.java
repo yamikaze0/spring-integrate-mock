@@ -2,7 +2,7 @@ package org.yamikaze.unit.test.mock;
 
 import org.yamikaze.unit.test.enhance.ModifiedClassHolder;
 import org.yamikaze.unit.test.mock.answer.Answer;
-import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
+import org.yamikaze.unit.test.mock.proxy.MockInvocation;
 import org.yamikaze.unit.test.tree.Profilers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,7 @@ public class InternalMockUtils {
 
         Class<?>[] paramTypes = generateParamTypes(methodDesc);
 
-        InvocationMethod mi = new InvocationMethod();
+        MockInvocation mi = new MockInvocation();
         mi.setMethod(ClassUtils.findMethod(clz, methodName, paramTypes));
         mi.setTargetClass(clz);
         mi.setDeclaringClass(clz);

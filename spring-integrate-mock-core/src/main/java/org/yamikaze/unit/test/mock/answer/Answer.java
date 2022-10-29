@@ -1,6 +1,6 @@
 package org.yamikaze.unit.test.mock.answer;
 
-import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
+import org.yamikaze.unit.test.mock.proxy.MockInvocation;
 
 /**
  * @author qinluo
@@ -16,7 +16,7 @@ public interface Answer {
      * @param invocation 方法调用对象
      * @return           方法返回值
      */
-    Object answer(InvocationMethod invocation);
+    Object answer(MockInvocation invocation);
 
     /**
      * 是否有访问

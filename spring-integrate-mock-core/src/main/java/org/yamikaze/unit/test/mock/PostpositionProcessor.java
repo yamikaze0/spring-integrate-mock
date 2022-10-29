@@ -13,5 +13,5 @@ public interface PostpositionProcessor {
      * @param result 结果
      * @param args   current invoke params
      */
-    void afterRealInvokeProcess(MethodInvokeTime mit, Object result, Object...args);
+    void afterRealInvokeProcess(InternalMethodInvocation mit, Object result, Object...args);
 }

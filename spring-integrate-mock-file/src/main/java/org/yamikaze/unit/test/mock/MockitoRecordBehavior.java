@@ -1,7 +1,7 @@
 package org.yamikaze.unit.test.mock;
 
 
-import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
+import org.yamikaze.unit.test.mock.proxy.MockInvocation;
 
 /**
  * @author qinluo
@@ -11,7 +11,7 @@ import org.yamikaze.unit.test.mock.proxy.InvocationMethod;
 public class MockitoRecordBehavior extends RecordBehavior {
 
     @Override
-    public boolean match(InvocationMethod invocation) {
+    public boolean match(MockInvocation invocation) {
         if (!Mockit.MOCKIT.isMock()) {
             return false;
         }
