@@ -180,7 +180,7 @@ public class ClassUtils {
             break;
         }
 
-        if (targetType == Object.class) {
+        if (targetType == Object.class || targetType == Proxy.class) {
             Class<?>[] interfaces = originType.getInterfaces();
             if (interfaces.length > 0) {
                 return interfaces[0];
